@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Add server directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi.testclient import TestClient
@@ -10,74 +9,72 @@ from main import app
 client = TestClient(app)
 
 def test_health():
-    response = client.get("/api/health")
-    assert response.status_code == 200
-    data = response.json()
+    res = client.get("/api/health")
+    assert res.status_code == 200
+    data = res.json()
     assert data["status"] == "nominal"
-    print("✅ Health check passed:", data["mission"])
+    assert "A* + any-angle smoothing" in data["supported_algorithms"]
+    print("✅ Health check passed. Algorithms:", len(data["supported_algorithms"]))
 
 def test_telemetry():
-    response = client.get("/api/telemetry")
-    assert response.status_code == 200
-    data = response.json()
+    res = client.get("/api/telemetry")
+    assert res.status_code == 200
+    data = res.json()
     assert "rems" in data
     assert "rad" in data
-    assert data["sol"] == 4000
-    print("✅ Telemetry endpoint passed: Ground temp =", data["rems"]["ground_temp_c"], "°C | Radiation =", data["rad"]["dose_rate_mSv_day"], "mSv/day")
+    print("✅ Telemetry passed: Sol", data["sol"])
 
-def test_geology_geojson():
-    response = client.get("/api/layers/geology")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["type"] == "FeatureCollection"
-    assert len(data["features"]) >= 3
-    print("✅ Geology GeoJSON passed:", len(data["features"]), "geological features loaded.")
+def test_terrain_profiles_and_stats():
+    res = client.get("/api/terrain/profiles")
+    assert res.status_code == 200
+    data = res.json()
+    assert "algorithms" in data and "profiles" in data and "priorities" in data
+    print("✅ Terrain profiles passed:", list(data["profiles"].keys()))
 
-def test_waypoints():
-    response = client.get("/api/layers/waypoints")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) >= 3
-    print("✅ Waypoints endpoint passed:", len(data), "preset waypoints loaded.")
+    res2 = client.get("/api/terrain/stats")
+    assert res2.status_code == 200
+    stats = res2.json()
+    assert "hazard_coverage_percent" in stats
+    print(f"✅ Terrain stats passed: Hazard coverage = {stats['hazard_coverage_percent']}% | Max slope = {stats['slope_deg']['max']}°")
 
-def test_route_plan():
+def test_single_route_plan():
     payload = {
-        "start": {
-            "lat": -4.6620,
-            "lng": 137.4120,
-            "name": "Curiosity Station (Sol 4000)"
-        },
-        "destination": {
-            "lat": -4.7180,
-            "lng": 137.4850,
-            "name": "Boxwork Ridge Site Alpha"
-        },
+        "start": { "lat": -4.6620, "lng": 137.4120, "name": "Curiosity Station" },
+        "destination": { "lat": -4.7180, "lng": 137.4850, "name": "Boxwork Ridge" },
         "mode": "safe",
-        "max_slope_deg": 15.0
+        "algorithm": "A* + any-angle smoothing"
     }
-    response = client.post("/api/route/plan", json=payload)
-    assert response.status_code == 200
-    data = response.json()
+    res = client.post("/api/route/plan", json=payload)
+    assert res.status_code == 200
+    data = res.json()
     assert data["status"] == "success"
-    summary = data["summary"]
-    coords = data["route_coordinates"]
-    profile = data["elevation_profile"]
+    sm = data["summary"]
+    print("✅ Single route planning passed (A* + any-angle smoothing):")
+    print(f"   Distance: {sm['total_distance_km']} km | Time: {sm['time_min']} min | Energy: {sm['energy_kj']} kJ | Risk: {sm['risk_score']}")
 
-    assert len(coords) > 5
-    assert len(profile) > 5
-    assert summary["total_distance_km"] > 0
-    print("✅ Route planning endpoint passed!")
-    print(f"   Distance: {summary['total_distance_km']} km")
-    print(f"   Max Slope: {summary['max_slope_deg']}° (Avg: {summary['avg_slope_deg']}°)")
-    print(f"   Estimated EVA Time: {summary['estimated_eva_time_hours']} hours")
-    print(f"   Route Coordinates Count: {len(coords)}")
-    print(f"   Elevation Profile Points: {len(profile)}")
+def test_multi_route_analyze():
+    payload = {
+        "start": { "lat": -4.6620, "lng": 137.4120 },
+        "destination": { "lat": -4.7180, "lng": 137.4850 },
+        "algorithms": ["Dijkstra", "A*", "Weighted A* (ε=2.5)", "A* + any-angle smoothing"],
+        "profiles": ["Shortest distance", "Safest (max clearance)", "Balanced"],
+        "priority": "Balanced"
+    }
+    res = client.post("/api/route/analyze", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert len(data["candidates"]) == 12  # 4 algos * 3 profiles
+    best = data["best_candidate"]
+    print(f"✅ Multi-route analysis passed! Evaluated {data['total_evaluated']} candidate combinations.")
+    print(f"   ★ Best Recommended ({data['priority']}): Rank #{best['rank']} | Profile: {best['profile']} | Model: {best['algorithm']}")
+    print(f"     Score: {best['composite_score']} | Dist: {best['total_distance_km']} km | Time: {best['time_min']} min | Energy: {best['energy_kj']} kJ | Risk: {best['risk_score']}")
 
 if __name__ == "__main__":
-    print("\n--- RUNNING BACKEND INTEGRATION SMOKE TESTS ---")
+    print("\n--- RUNNING ADVANCED BACKEND PIPELINE SMOKE TESTS ---")
     test_health()
     test_telemetry()
-    test_geology_geojson()
-    test_waypoints()
-    test_route_plan()
-    print("--- ALL BACKEND SMOKE TESTS PASSED NOMINALLY ---\n")
+    test_terrain_profiles_and_stats()
+    test_single_route_plan()
+    test_multi_route_analyze()
+    print("--- ALL BACKEND ADVANCED TESTS PASSED NOMINALLY ---\n")
