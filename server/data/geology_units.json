@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "name": "Gale_Crater_Mount_Sharp_Boxwork_Geology",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "geo-boxwork-01",
+      "properties": {
+        "name": "Boxwork Ridge Structure Network",
+        "unit_type": "boxwork_formation",
+        "mineral": "Cemented Quartz-Clay Veins & Gypsum Boxwork",
+        "science_priority": "CRITICAL",
+        "trafficability_hazard": "MEDIUM",
+        "description": "Polygonal fracture patterns cemented by ancient mineralizing groundwater, newly targeted on lower Mount Sharp.",
+        "color": "#f59e0b",
+        "fillColor": "#f59e0b",
+        "fillOpacity": 0.35,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [137.4600, -4.7000],
+            [137.4950, -4.7050],
+            [137.5100, -4.7300],
+            [137.4750, -4.7400],
+            [137.4500, -4.7200],
+            [137.4600, -4.7000]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geo-sulfate-02",
+      "properties": {
+        "name": "Sulfate-Bearing Layered Strata",
+        "unit_type": "sulfate_unit",
+        "mineral": "Polyhydrated & Monohydrated Sulfates",
+        "science_priority": "HIGH",
+        "trafficability_hazard": "LOW",
+        "description": "Evidence of Mars' transition to a drier, hyper-arid climate. Layered rock shelves with stepped benches.",
+        "color": "#a855f7",
+        "fillColor": "#a855f7",
+        "fillOpacity": 0.25,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [137.4100, -4.6700],
+            [137.4650, -4.6800],
+            [137.4800, -4.7100],
+            [137.4300, -4.7250],
+            [137.3950, -4.6900],
+            [137.4100, -4.6700]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geo-clay-03",
+      "properties": {
+        "name": "Glen Torridon Clay-Bearing Unit",
+        "unit_type": "clay_unit",
+        "mineral": "Smectite / Fe-Mg Phyllosilicates",
+        "science_priority": "HIGH",
+        "trafficability_hazard": "LOW",
+        "description": "Formed in neutral, habitable ancient lacustrine (lake) waters at the base of Mount Sharp. Smooth, easily navigable terrain.",
+        "color": "#06b6d4",
+        "fillColor": "#06b6d4",
+        "fillOpacity": 0.25,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [137.3700, -4.6400],
+            [137.4300, -4.6500],
+            [137.4200, -4.6800],
+            [137.3600, -4.6700],
+            [137.3700, -4.6400]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geo-dunes-04",
+      "properties": {
+        "name": "Bagnold / Stimson Active Sand Dunes",
+        "unit_type": "dune_hazard",
+        "mineral": "Basaltic Olivine & Pyroxene Sand",
+        "science_priority": "LOW",
+        "trafficability_hazard": "EXTREME",
+        "description": "High-slip active dark sand ripples. Mobility trap hazard for rover wheels and astronaut boots. Avoid traversal.",
+        "color": "#ef4444",
+        "fillColor": "#ef4444",
+        "fillOpacity": 0.45,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [137.3600, -4.6750],
+            [137.4000, -4.6850],
+            [137.3900, -4.7150],
+            [137.3500, -4.7000],
+            [137.3600, -4.6750]
+          ]
+        ]
+      }
+    }
+  ]
+}

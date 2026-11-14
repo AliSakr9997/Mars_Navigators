@@ -1,0 +1,47 @@
+[
+  {
+    "id": "wp-curiosity-sol4000",
+    "name": "Curiosity Station (Sol 4000)",
+    "type": "base_station",
+    "lat": -4.6620,
+    "lng": 137.4120,
+    "elevation_m": -4462.0,
+    "description": "Baseline deployment station on lower Mount Sharp. Hab and communication link."
+  },
+  {
+    "id": "wp-boxwork-alpha",
+    "name": "Boxwork Ridge Site Alpha",
+    "type": "scientific_target",
+    "lat": -4.7180,
+    "lng": 137.4850,
+    "elevation_m": -4120.0,
+    "description": "Primary EVA objective. High concentration of cemented polygonal mineral fractures."
+  },
+  {
+    "id": "wp-sulfate-trench",
+    "name": "Sulfate Stratigraphy Bench",
+    "type": "scientific_target",
+    "lat": -4.6950,
+    "lng": 137.4400,
+    "elevation_m": -4280.0,
+    "description": "Secondary science site. Stepped mineral benches indicating ancient climatic drying."
+  },
+  {
+    "id": "wp-glen-torridon-clay",
+    "name": "Glen Torridon Clay Haven",
+    "type": "scientific_target",
+    "lat": -4.6550,
+    "lng": 137.3850,
+    "elevation_m": -4480.0,
+    "description": "Ancient lacustrine lakebed deposits with smectite clay phyllosilicates."
+  },
+  {
+    "id": "wp-gediz-vallis",
+    "name": "Gediz Vallis Channel Outlook",
+    "type": "hazard_checkpoint",
+    "lat": -4.7450,
+    "lng": 137.4350,
+    "elevation_m": -3950.0,
+    "description": "Steep debris-flow channel cutting through upper sulfate layers. High slope hazard."
+  }
+]

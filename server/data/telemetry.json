@@ -1,0 +1,27 @@
+{
+  "status": "nominal",
+  "location": "Gale Crater - Mount Sharp (Aeolis Mons) Foot",
+  "sol": 4000,
+  "timestamp": "2026-11-14T12:00:00Z",
+  "rems": {
+    "sol": 4000,
+    "air_temp_c": -18.4,
+    "ground_temp_c": 2.1,
+    "pressure_pa": 828.5,
+    "wind_speed_ms": 4.2,
+    "wind_direction_deg": 142,
+    "uv_index": "HIGH",
+    "diurnal_min_c": -74.2,
+    "diurnal_max_c": 4.6,
+    "humidity_relative_percent": 1.2
+  },
+  "rad": {
+    "dose_rate_mSv_day": 0.67,
+    "dose_rate_uSv_hour": 27.9,
+    "cumulative_eva_allowed_hours": 8.5,
+    "solar_particle_event_alert": false,
+    "status": "LOW_SOLAR_ACTIVITY",
+    "shielding_recommendation": "Nominal EVA Space Suit Layering"
+  },
+  "disclaimer": "REMS and RAD measurements are point in-situ observations from NASA's Curiosity rover at Mount Sharp, not continuous regional spatial grids. Values are provided as an ambient mission safety baseline."
+}
