@@ -1,14 +1,15 @@
 import React from 'react';
-import { Compass, MapPin, ShieldCheck, Activity, Mountain, ArrowRight, Sparkles, Radio } from 'lucide-react';
+import { ShieldCheck, Activity, Mountain, ArrowRight, Sparkles, Radio, MapPin } from 'lucide-react';
 
 interface LandingPageProps {
   onStartJourney: () => void;
-  onOpenConsole: () => void;
+  onOpenConsole?: () => void;
+  onReplayCinematic?: () => void;
+  onOpenSources?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
-  onStartJourney,
-  onOpenConsole
+  onStartJourney
 }) => {
   return (
     <div style={{
@@ -22,13 +23,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       flexDirection: 'column',
       justifyContent: 'space-between'
     }}>
-      {/* Background Starfield & Atmosphere Ambient */}
+      {/* Background: Space Starfield & Atmospheric Martian Gale Crater Horizon (from Landing Scene) */}
       <div style={{
         position: 'absolute',
         inset: 0,
         backgroundImage: `
-          radial-gradient(circle at 50% 35%, rgba(224, 108, 58, 0.15) 0%, transparent 60%),
+          radial-gradient(circle at 50% 32%, rgba(224, 108, 58, 0.18) 0%, transparent 60%),
           radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+          linear-gradient(180deg, rgba(12, 10, 9, 0.95) 0%, rgba(32, 21, 23, 0.85) 50%, rgba(78, 48, 38, 0.45) 80%, rgba(132, 85, 62, 0.3) 100%),
           radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
           radial-gradient(2px 2px at 140px 170px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
           radial-gradient(1px 1px at 250px 80px, #ffffff, rgba(0,0,0,0)),
@@ -42,11 +44,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           radial-gradient(1px 1px at 1420px 150px, #ffffff, rgba(0,0,0,0))
         `,
         backgroundRepeat: 'repeat',
-        backgroundSize: '100% 100%, 100% 100%, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px',
+        backgroundSize: '100% 100%, 100% 100%, 100% 100%, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px, 450px 450px',
         pointerEvents: 'none'
       }} />
 
-      {/* Top Header */}
+      {/* Top Header - Clean, No Top-Right Buttons */}
       <header style={{
         padding: '24px 36px',
         display: 'flex',
@@ -55,20 +57,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         position: 'relative',
         zIndex: 10
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <img
             src="/mission_mark.svg"
             alt="Mars Navigators"
-            style={{ width: '40px', height: '40px' }}
+            style={{ width: '42px', height: '42px' }}
             onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
           />
           <div>
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: '26px',
+              fontSize: '28px',
               fontWeight: 700,
-              letterSpacing: '1px',
-              color: '#f3e7d8'
+              letterSpacing: '1.2px',
+              color: '#f3e7d8',
+              lineHeight: 1
             }}>
               MARS NAVIGATORS
             </div>
@@ -76,57 +79,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: '11px',
               color: '#f1a16e',
-              letterSpacing: '1px'
+              letterSpacing: '1.5px',
+              marginTop: '4px'
             }}>
               NASA SPACE APPS CHALLENGE 2026
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <button
-            onClick={onOpenConsole}
-            style={{
-              backgroundColor: '#201c19',
-              border: '1px solid #443a33',
-              borderRadius: '6px',
-              color: '#bdb0a2',
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#f3e7d8';
-              e.currentTarget.style.borderColor = '#f1a16e';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#bdb0a2';
-              e.currentTarget.style.borderColor = '#443a33';
-            }}
-          >
-            Mission Control
-          </button>
-          <button
-            onClick={onStartJourney}
-            style={{
-              backgroundColor: '#f1a16e',
-              border: '1px solid #f1a16e',
-              borderRadius: '6px',
-              color: '#151210',
-              padding: '8px 20px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            Start Route Planner &nbsp;→
-          </button>
-        </div>
+        {/* Note: The 4 buttons from 1st image are completely removed as requested */}
       </header>
 
       {/* Hero Section with 3D Hovering Mars Planet */}
@@ -135,7 +96,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '30px 20px 20px 20px',
+        padding: '20px 20px 10px 20px',
         textAlign: 'center',
         position: 'relative',
         zIndex: 10
@@ -149,11 +110,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           marginBottom: '8px',
           textTransform: 'uppercase'
         }}>
-          Interplanetary Survival Guide &nbsp;//&nbsp; Gale Crater & Mount Sharp
+          Interplanetary Survival Guide &nbsp;//&nbsp; Gale Crater &amp; Mount Sharp
         </div>
 
+        {/* Main Title */}
         <h1 style={{
-          margin: '0 0 16px 0',
+          margin: '0 0 12px 0',
           fontFamily: "'Barlow Condensed', sans-serif",
           fontSize: 'clamp(44px, 6vw, 76px)',
           fontWeight: 700,
@@ -167,9 +129,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* 3D Hovering Mars Planet Container */}
         <div style={{
           position: 'relative',
-          width: 'clamp(260px, 32vw, 360px)',
-          height: 'clamp(260px, 32vw, 360px)',
-          margin: '15px auto 30px auto',
+          width: 'clamp(270px, 34vw, 380px)',
+          height: 'clamp(270px, 34vw, 380px)',
+          margin: '12px auto 26px auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -177,30 +139,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Subtle Outer Orbital Ring */}
           <div style={{
             position: 'absolute',
-            width: '128%',
-            height: '128%',
+            width: '132%',
+            height: '132%',
             borderRadius: '50%',
-            border: '1px dashed rgba(241, 161, 110, 0.25)',
-            transform: 'rotateX(75deg)',
+            border: '1px dashed rgba(241, 161, 110, 0.3)',
+            transform: 'rotateX(72deg)',
             pointerEvents: 'none'
           }} />
 
           {/* Mars Sphere with Floating Animation & Realistic 3D Atmosphere */}
-          <div style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            position: 'relative',
-            boxShadow: `
-              0 0 50px rgba(224, 108, 58, 0.35),
-              0 0 100px rgba(241, 161, 110, 0.2),
-              inset -35px -35px 70px rgba(0, 0, 0, 0.95),
-              inset 15px 15px 40px rgba(255, 210, 170, 0.25)
-            `,
-            border: '1px solid rgba(241, 161, 110, 0.4)',
-            animation: 'marsFloat 6s ease-in-out infinite'
-          }}>
+          <div
+            onClick={onStartJourney}
+            title="Mars 3D Hovering Planet · Click to explore Gale Crater"
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              position: 'relative',
+              cursor: 'pointer',
+              boxShadow: `
+                0 0 55px rgba(224, 108, 58, 0.4),
+                0 0 110px rgba(241, 161, 110, 0.25),
+                inset -38px -38px 75px rgba(0, 0, 0, 0.96),
+                inset 16px 16px 40px rgba(255, 210, 170, 0.3)
+              `,
+              border: '1px solid rgba(241, 161, 110, 0.45)',
+              animation: 'marsFloat 6s ease-in-out infinite'
+            }}
+          >
             <img
               src="/mars_globe.jpg"
               alt="Mars 3D Hovering Planet"
@@ -224,35 +191,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               pointerEvents: 'none'
             }}>
               <div style={{
-                width: '14px',
-                height: '14px',
+                width: '18px',
+                height: '18px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(241, 161, 110, 0.4)',
+                backgroundColor: 'rgba(241, 161, 110, 0.45)',
                 animation: 'pulse 2s infinite'
               }} />
               <div style={{
                 position: 'absolute',
-                top: '3px',
-                left: '3px',
-                width: '8px',
-                height: '8px',
+                top: '4px',
+                left: '4px',
+                width: '10px',
+                height: '10px',
                 borderRadius: '50%',
                 backgroundColor: '#ffffff',
-                boxShadow: '0 0 10px #f1a16e'
+                boxShadow: '0 0 12px #f1a16e'
               }} />
             </div>
           </div>
+
+          {/* Gale Crater Pointer Tag */}
+          <div
+            onClick={onStartJourney}
+            style={{
+              position: 'absolute',
+              top: '32%',
+              left: '70%',
+              backgroundColor: 'rgba(24, 21, 18, 0.92)',
+              border: '1px solid #f1a16e',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '11px',
+              fontFamily: "'IBM Plex Mono', monospace",
+              color: '#f3e7d8',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px',
+              cursor: 'pointer',
+              zIndex: 20,
+              pointerEvents: 'auto',
+              whiteSpace: 'nowrap',
+              animation: 'marsFloat 6s ease-in-out infinite'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f1a16e', fontWeight: 600 }}>
+              <MapPin size={12} />
+              GALE CRATER
+            </div>
+            <span style={{ fontSize: '10px', color: '#c0c8a1' }}>Mount Sharp · 4.6°S, 137.4°E</span>
+          </div>
         </div>
 
-        {/* Big Call to Action Button Under Mars */}
-        <div style={{ marginBottom: '28px' }}>
+        {/* START YOUR JOURNEY Button Under Mars */}
+        <div style={{ marginBottom: '24px' }}>
           <button
             onClick={onStartJourney}
             style={{
               backgroundColor: '#f1a16e',
               border: 'none',
               borderRadius: '8px',
-              padding: '16px 42px',
+              padding: '16px 44px',
               fontSize: '20px',
               fontWeight: 700,
               fontFamily: "'Barlow Condensed', sans-serif",
@@ -278,12 +277,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </button>
         </div>
 
-        {/* About the Team Banner */}
+        {/* ABOUT THE TEAM Banner */}
         <div style={{
           backgroundColor: '#1b1714',
           border: '1px solid #443a33',
           borderRadius: '12px',
-          maxWidth: '780px',
+          maxWidth: '840px',
           width: '100%',
           padding: '24px 30px',
           textAlign: 'center',
@@ -315,21 +314,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
 
           <p style={{
-            fontSize: '14px',
+            fontSize: '13.5px',
             color: '#bdb0a2',
             lineHeight: 1.6,
             margin: 0
           }}>
-            We build astronaut-ready surface route planners for Gale Crater & Mount Sharp.
-            Using actual NASA orbital elevation models and Curiosity REMS weather telemetry, our system calculates real walking times, suit battery & oxygen draw, and safe paths avoiding steep cliffs and sand dune traps.
+            We build astronaut-ready surface route planners for Gale Crater &amp; Mount Sharp. Using actual NASA orbital elevation models and Curiosity REMS weather telemetry, our system calculates real walking times, suit battery &amp; oxygen draw, and safe paths avoiding steep cliffs and sand dune traps.
           </p>
         </div>
       </section>
 
-      {/* 4 Feature Cards (Simple & Informative for Judges and Users) */}
+      {/* 4 Feature Cards */}
       <section style={{
         maxWidth: '1200px',
-        margin: '20px auto 40px auto',
+        margin: '18px auto 36px auto',
         padding: '0 24px',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -337,6 +335,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         position: 'relative',
         zIndex: 10
       }}>
+        {/* Card 1: Real Martian DEM */}
         <div style={{
           backgroundColor: '#181512',
           border: '1px solid #332822',
@@ -355,6 +354,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
         </div>
 
+        {/* Card 2: Physiological Energy */}
         <div style={{
           backgroundColor: '#181512',
           border: '1px solid #332822',
@@ -373,6 +373,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
         </div>
 
+        {/* Card 3: Active Hazard Clearance */}
         <div style={{
           backgroundColor: '#181512',
           border: '1px solid #332822',
@@ -391,6 +392,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
         </div>
 
+        {/* Card 4: Curiosity REMS Weather */}
         <div style={{
           backgroundColor: '#181512',
           border: '1px solid #332822',

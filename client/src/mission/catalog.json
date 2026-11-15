@@ -1,0 +1,129 @@
+[
+  {
+    "name": "General exploration",
+    "targets": [
+      {
+        "name": "Surface reconnaissance",
+        "description": "Survey accessible exposures and photograph the terrain.",
+        "sites": [
+          {
+            "name": "Bradbury Landing",
+            "x": 0.45223880597014926,
+            "y": 0.6089887640449438
+          },
+          {
+            "name": "Rocknest",
+            "x": 0.7134328358208956,
+            "y": 0.4606741573033708
+          }
+        ]
+      },
+      {
+        "name": "Ancient water",
+        "description": "Inspect rocks preserving evidence of flowing or standing water.",
+        "sites": [
+          {
+            "name": "Hottah",
+            "x": 0.32686567164179103,
+            "y": 0.5258426966292135
+          },
+          {
+            "name": "Yellowknife Bay",
+            "x": 0.817910447761194,
+            "y": 0.5775280898876405
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mineral search",
+    "targets": [
+      {
+        "name": "Clay minerals",
+        "description": "Investigate mudstones sampled by the Curiosity drill.",
+        "sites": [
+          {
+            "name": "John Klein",
+            "x": 0.4626865671641791,
+            "y": 0.4786516853932584
+          },
+          {
+            "name": "Cumberland",
+            "x": 0.6253731343283582,
+            "y": 0.3775280898876405
+          }
+        ]
+      },
+      {
+        "name": "Jarosite",
+        "description": "Compare sulfate-bearing drill targets at Pahrump Hills.",
+        "sites": [
+          {
+            "name": "Mojave 2",
+            "x": 0.5253731343283582,
+            "y": 0.5640449438202247
+          },
+          {
+            "name": "Confidence Hills",
+            "x": 0.7149253731343284,
+            "y": 0.5078651685393258
+          }
+        ]
+      },
+      {
+        "name": "Iron · hematite",
+        "description": "Survey iron-oxide-bearing rocks on lower Mount Sharp.",
+        "sites": [
+          {
+            "name": "Confidence Hills",
+            "x": 0.7149253731343284,
+            "y": 0.5078651685393258
+          },
+          {
+            "name": "Vera Rubin Ridge",
+            "x": 0.8432835820895522,
+            "y": 0.3258426966292135
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Regional survey",
+    "targets": [
+      {
+        "name": "Dune fields",
+        "description": "Compare dune morphology in the Bagnold dune field.",
+        "sites": [
+          {
+            "name": "High Dune",
+            "x": 0.382089552238806,
+            "y": 0.4651685393258427
+          },
+          {
+            "name": "Namib Dune",
+            "x": 0.7328358208955223,
+            "y": 0.3887640449438202
+          }
+        ]
+      },
+      {
+        "name": "Sedimentary outcrops",
+        "description": "Examine bedding and erosion in exposed rock.",
+        "sites": [
+          {
+            "name": "Pahrump Hills",
+            "x": 0.47313432835820896,
+            "y": 0.451685393258427
+          },
+          {
+            "name": "Murray Buttes",
+            "x": 0.8880597014925373,
+            "y": 0.4966292134831461
+          }
+        ]
+      }
+    ]
+  }
+]
