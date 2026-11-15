@@ -1,9 +1,6 @@
 services:
   - type: web
-    name: ares-gale-backend
-    env: python
-    buildCommand: "pip install -r server/requirements.txt"
-    startCommand: "cd server && uvicorn main:app --host 0.0.0.0 --port $PORT"
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.5
+    name: ares-gale-field
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health

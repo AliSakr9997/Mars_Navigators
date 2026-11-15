@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suit telemetry · ARES–Gale</title>
+<style>
+:root{color-scheme:dark;--ink:#f1e6d8;--muted:#bdad9e;--line:#47392f;--copper:#eda270;--surface:#231e1a;--base:#181512;--sage:#c3c6a1}
+*{box-sizing:border-box}body{margin:0;background:var(--base);color:var(--ink);font:16px/1.5 Inter,Arial,sans-serif}main{max-width:1230px;margin:auto;padding:34px 42px 54px}header,article>header,.section-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.kicker,.unit,.stamp,th,code,.signal{font:12px/1.5 "IBM Plex Mono",Consolas,monospace;letter-spacing:.055em}.kicker,.stamp,.unit,th,small{color:var(--muted)}h1,h2,h3,p{margin:0}h1{font:600 clamp(34px,5vw,55px)/1.1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:-.035em;margin:7px 0 24px}h2{font-size:21px}h3{font-size:17px}.mast{border-bottom:1px solid var(--line);margin-bottom:25px}.mast .kicker{color:var(--copper)}.stamp{text-align:right}
+.grid{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(280px,.82fr);gap:16px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px}.modes{display:flex;gap:4px;background:#181411;border:1px solid var(--line);border-radius:5px;padding:4px;margin:20px 0}.modes button{width:50%;color:var(--muted);background:transparent;border:0}.modes [aria-pressed=true]{color:var(--ink);background:#443227}
+button,input{font:inherit}button{cursor:pointer;border-radius:4px;padding:9px 14px;border:1px solid var(--line);background:#312820;color:var(--ink)}button:focus-visible,input:focus,summary:focus-visible{outline:2px solid var(--copper);outline-offset:2px}button:disabled,input:disabled{opacity:.55;cursor:default}label{display:block;font-weight:550;margin:15px 0 5px}.field{display:flex;align-items:center;border:1px solid #625045;border-radius:4px;background:#1a1714;padding-right:14px}.field:focus-within{border-color:var(--copper)}input{width:100%;min-width:0;border:0;background:transparent;padding:10px 12px;color:var(--ink)}input::placeholder{color:#918477}.unit{white-space:nowrap}.primary{background:var(--copper);border-color:var(--copper);color:#24180e;font-weight:650}.actions{display:flex;gap:9px;margin-top:22px;flex-wrap:wrap}.hint{font-size:14px;color:var(--muted);margin:6px 0 14px}.signal{display:inline-flex;align-items:center;gap:7px;color:var(--sage)}.signal:before{content:"";height:7px;width:7px;border-radius:50%;background:currentColor}.signal[data-state=offline]{color:var(--muted)}.signal[data-state=warn],.error{color:#ffab8e}
+.metric{padding:17px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px}.metric strong{font:500 29px/1.2 "IBM Plex Mono",Consolas,monospace}.metric small{grid-column:1/-1}.source-info{margin-top:14px;font-size:13px;color:var(--muted)}.history{margin-top:16px}.overflow{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}th,td{padding:10px 6px;border-bottom:1px solid var(--line)}th{font-weight:400}th:first-child,td:first-child{padding-left:0}td{font-variant-numeric:tabular-nums}pre{font-size:12px;overflow:auto;margin:8px 0}summary{cursor:pointer;color:var(--copper);font-size:14px}details{margin-top:16px}.status{margin-top:12px;min-height:1.5em;font-size:14px}footer{margin-top:18px;color:var(--muted);font-size:13px}[hidden]{display:none!important}
+@media(max-width:740px){main{padding:20px 16px}.grid{grid-template-columns:1fr}.panel{padding:18px}.stamp{font-size:10px}header{align-items:flex-start}}
+</style>
+<main>
+ <header class="mast"><div><p class="kicker">ARES–GALE / SURFACE OPERATIONS</p><h1>Suit telemetry</h1></div><div class="stamp">GALE CRATER<br>CREW SYSTEMS</div></header>
+ <div class="grid"><section class="panel"><p class="kicker">INPUT CHANNEL</p><h2>Reading source</h2>
+ <div class="modes" role="group" aria-label="Reading source"><button id="manual" aria-pressed="true">Manual entry</button><button id="sensor" aria-pressed="false">Link suit feed</button></div>
+ <form id="manual-form"><p class="hint">Enter readings from the same suit check.</p>
+ <label for="oxygen">Oxygen remaining</label><div class="field"><input id="oxygen" type="number" min="0" max="100" step="any" placeholder="0–100" required><span class="unit">%</span></div>
+ <label for="battery">Suit battery</label><div class="field"><input id="battery" type="number" min="0" max="100" step="any" placeholder="0–100" required><span class="unit">%</span></div>
+ <label for="temperature">Internal suit temperature</label><div class="field"><input id="temperature" type="number" step="any" placeholder="Enter reading" required><span class="unit">°C</span></div>
+ <label for="radiation">Radiation dose rate <small>(optional)</small></label><div class="field"><input id="radiation" type="number" min="0" step="any" aria-describedby="radiation-unit" placeholder="Enter dosimeter reading"><span class="unit" id="radiation-unit">µSv/h</span></div>
+ <div class="actions"><button class="primary">Save readings</button></div></form>
+ <form id="feed-form" hidden><p class="hint">Use the HTTPS address supplied by the suit gateway. The feed is checked every 5 seconds.</p>
+ <label for="endpoint">Telemetry endpoint</label><div class="field"><input type="url" id="endpoint" placeholder="https://your-gateway/telemetry" required autocomplete="off" spellcheck="false"></div>
+ <details><summary>Expected JSON &amp; units</summary><pre>{
+  "oxygen_pct": 84,
+  "battery_pct": 72,
+  "suit_temp_c": 21.5,
+  "radiation_usv_h": 0.25,
+  "timestamp": "2026-11-14T12:30:00Z"
+}</pre><p class="hint">Radiation dose rate is optional, in µSv/h. Omit it or send null when unavailable. The optional timestamp uses ISO 8601 with a timezone. The gateway must allow browser reads from this preview.</p></details>
+ <div class="actions"><button class="primary" id="connect">Connect</button><button type="button" id="stop" disabled>Disconnect</button></div></form>
+ <p class="status" id="status" role="status"></p></section>
+ <section class="panel"><p class="kicker">INSTRUMENT READOUT</p><header><h2>Latest readings</h2><span class="signal" id="signal" data-state="offline">Awaiting input</span></header><div id="metrics"></div><p class="source-info" id="when">No reading received.</p></section></div>
+ <section class="panel history"><div class="section-head"><h2>Reading log</h2><span class="kicker">LATEST 12 · UTC</span></div><div class="overflow"><table><thead><tr><th>Time</th><th>Source</th><th>Oxygen</th><th>Battery</th><th>Suit temp.</th><th>Radiation dose rate</th></tr></thead><tbody id="log"></tbody></table></div></section><footer>Readings are stored in this browser when local storage is available.</footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const keys = ['oxygen_pct','battery_pct','suit_temp_c','radiation_usv_h'];
+const titles = ['Oxygen remaining','Suit battery','Internal suit temperature','Radiation dose rate'];
+const units = ['%','%','°C','µSv/h'];
+const storageKey = 'ares-gale-suit-v1';
+const num = n => new Intl.NumberFormat('en',{maximumFractionDigits:2}).format(n);
+const utc = t => new Date(t).toISOString().slice(0,19).replace('T',' ');
+const percentage = n => Number.isFinite(n) && n >= 0 && n <= 100;
+const valid = v => v && percentage(v.oxygen_pct) && percentage(v.battery_pct) && Number.isFinite(v.suit_temp_c)
+ && (v.radiation_usv_h == null || (Number.isFinite(v.radiation_usv_h) && v.radiation_usv_h >= 0));
+const doseNumber = new Intl.NumberFormat('en',{maximumSignificantDigits:5});
+function reading(row,i){
+ const value=row?.[keys[i]];
+ if(value == null) return '—';
+ return (keys[i]==='radiation_usv_h'?doseNumber.format(value):num(value))+' '+units[i];
+}
+let rows = [], timer, controller, generation=0, active=false, lastFeedTime=null;
+try{const saved=JSON.parse(localStorage.getItem(storageKey)||'[]');if(Array.isArray(saved)) rows=saved.filter(r=>valid(r)&&['Manual','Suit feed'].includes(r.source)&&typeof r.at==='number'&&Number.isFinite(new Date(r.at).getTime())).slice(0,12)}catch{}
+function message(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error)}
+function signal(text,state){$('signal').textContent=text;$('signal').dataset.state=state}
+function render(){
+ const r=rows[0];$('metrics').replaceChildren();titles.forEach((t,i)=>{const el=document.createElement('div');el.className='metric';const label=document.createElement('span'),value=document.createElement('strong'),unit=document.createElement('small');label.textContent=t;value.textContent=reading(r,i);unit.textContent=r?.[keys[i]]!=null?r.source+' · '+utc(r.at)+' UTC':'No sample · '+units[i];el.append(label,value,unit);$('metrics').append(el)});
+ $('when').textContent=r?(r.deviceTime?'Measured':'Recorded')+' at '+utc(r.at)+' UTC':'No reading received.';
+ $('log').replaceChildren();for(const row of rows){const tr=document.createElement('tr');for(const v of [utc(row.at),row.source,...keys.map((k,i)=>reading(row,i))]){const td=document.createElement('td');td.textContent=v;tr.append(td)}$('log').append(tr)}
+ if(!rows.length){const td=document.createElement('td');td.colSpan=2+keys.length;td.textContent='Your first saved or received sample will appear here.';const tr=document.createElement('tr');tr.append(td);$('log').append(tr)}
+}
+function record(values,source,at,deviceTime){rows.unshift(Object.assign(Object.fromEntries(keys.map(k=>[k,values[k]])),{source,at,deviceTime}));rows=rows.slice(0,12);try{localStorage.setItem(storageKey,JSON.stringify(rows))}catch{}render()}
+function disconnect(){active=false;generation++;clearTimeout(timer);controller?.abort();$('connect').disabled=false;$('stop').disabled=true;$('endpoint').disabled=false;signal(rows.length?'Last saved':'Awaiting input','offline')}
+function mode(feed){disconnect();$('manual-form').hidden=feed;$('feed-form').hidden=!feed;$('manual').setAttribute('aria-pressed',String(!feed));$('sensor').setAttribute('aria-pressed',String(feed));message('')}
+$('manual').onclick=()=>mode(false);$('sensor').onclick=()=>mode(true);$('stop').onclick=()=>{disconnect();message('Feed disconnected. The last sample is retained.')};
+$('manual-form').onsubmit=e=>{e.preventDefault();const v={oxygen_pct:$('oxygen').valueAsNumber,battery_pct:$('battery').valueAsNumber,suit_temp_c:$('temperature').valueAsNumber,radiation_usv_h:$('radiation').value===''?null:$('radiation').valueAsNumber};if(!valid(v))return message('Enter valid numbers. Percentages must be 0–100 and radiation dose rate must be zero or higher.',true);record(v,'Manual',Date.now(),false);signal('Manual entry','ok');message('Suit readings saved.')};
+$('feed-form').onsubmit=e=>{e.preventDefault();if(active)return;let endpoint;try{endpoint=new URL($('endpoint').value.trim());if(endpoint.protocol!=='https:'||endpoint.username||endpoint.password)throw Error()}catch{return message('Enter an HTTPS feed URL without embedded sign-in details.',true)}
+ active=true;lastFeedTime=null;const run=++generation;$('endpoint').disabled=true;$('connect').disabled=true;$('stop').disabled=false;signal('Connecting','offline');message('Waiting for a valid suit sample…');
+ async function poll(){if(!active||run!==generation)return;const req=new AbortController();controller=req;const deadline=setTimeout(()=>req.abort(),8000);
+ try{const res=await fetch(endpoint.href,{signal:req.signal,cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',headers:{Accept:'application/json'}});if(!res.ok)throw Error('Gateway returned HTTP '+res.status+'.');const data=await res.json();if(run!==generation)return;if(!valid(data))throw Error('Invalid sample. Check required fields, percentages and non-negative radiation dose rate.');
+ const now=Date.now(),hasTime=data.timestamp!==undefined;if(hasTime && (typeof data.timestamp!=='string'||!/(Z|[+-]\d{2}:\d{2})$/i.test(data.timestamp)))throw Error('Use an ISO timestamp with timezone.');const at=hasTime?Date.parse(data.timestamp):now;if(!Number.isFinite(at)||at>now+60000)throw Error('Check the device timestamp.');
+ if(lastFeedTime===null||at>lastFeedTime){record(data,'Suit feed',at,hasTime);lastFeedTime=at}
+ if(hasTime&&now-lastFeedTime>60000){signal('Stale sample','warn');message('The most recent device sample is over a minute old.',true)}else{signal('Receiving','ok');message(hasTime?'Polling every 5 seconds.':'Polling every 5 seconds. Using receipt time.')}
+ }catch(err){if(run!==generation)return;signal('Feed unavailable','warn');message((err instanceof TypeError?'Cannot read this endpoint. Check the address, network and gateway CORS settings.':err.name==='AbortError'?'Gateway timed out.':err.message)+' Retrying in 5 seconds.',true)}
+ finally{clearTimeout(deadline);if(active&&run===generation)timer=setTimeout(poll,5000)}}
+ poll()};
+window.addEventListener('pagehide',disconnect);render();if(rows.length)signal('Last saved','offline');
+</script>
+</html>

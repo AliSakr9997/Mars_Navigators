@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mission objectives · ARES–Gale</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#07111f;color:#e7f2fa;font-family:Arial,sans-serif}main{max-width:1600px;margin:auto}svg{width:100%;height:auto;display:block}svg a rect{fill:transparent}svg a:hover rect,svg a:focus-visible rect{fill:#78deed12;stroke:#78deed;stroke-width:2}footer{max-width:1500px;margin:0 auto;padding:0 3.5vw 20px;color:#9ab0c2;font-size:13px}footer a{color:#9bd5e3} @media(max-width:700px){main{min-width:790px}footer{min-width:700px}}</style></head>
+<body><main id="screen"></main><footer>Science references · <a href="https://science.nasa.gov/resource/mudstone-mineralogy-from-curiositys-chemin-2013-to-2016/">Curiosity drill samples</a> · <a href="https://science.nasa.gov/mission/msl-curiosity/">Curiosity mission</a></footer>
+<script src="objectives.js"></script><script>
+const valid=new Set(['goals']);missionGroups.forEach((g,j)=>{valid.add('targets-'+j);g.items.forEach((_,i)=>[0,1].forEach(s=>valid.add(['map',j,i,s].join('-'))))});
+function render(){const key=location.hash.slice(1);const view=missionView(valid.has(key)?key:'goals','objective-terrain.jpg');
+const links=view.hits.map(h=>'<a href="'+(h.to==='dashboard'?'index.html':'#'+h.to)+'" aria-label="'+h.label+'"><rect x="'+h.x+'" y="'+h.y+'" width="'+h.w+'" height="'+h.h+'" rx="5"/></a>').join('');
+document.getElementById('screen').innerHTML=view.svg.replace('</svg>',links+'</svg>');}
+const attempted = new Set();
+async function showTarget(){
+  render();
+  const match = /^#map-(\d+)-(\d+)-[01]$/.exec(location.hash);
+  if (!match || !valid.has(location.hash.slice(1))) return;
+  const group=Number(match[1]), item=Number(match[2]), key=group+'-'+item;
+  if(attempted.has(key)) return;
+  attempted.add(key);
+  try {
+    const candidates = await Promise.all(missionRoutes(group,item).map(async site=>{
+      const dest=sites[site.site];
+      const response=await fetch('/api/field/traverse',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({start:[92/670,352/445],end:[dest[0]/670,dest[1]/445],mode:'Balanced'})});
+      if(!response.ok)throw Error();
+      const data=await response.json();
+      return {...site,trail:data.pts.map(([x,y])=>[x*670,y*445]),km:data.d,minutes:data.time,risk:data.risk,
+        hazard:data.cl+' · peak slope '+data.peak.toFixed(1)+'°',source:'Terrain model · simulated area and site positions.'};
+    }));
+    modeledSites.set(key,candidates.sort((a,b)=>a.km-b.km));
+    render();
+  } catch { attempted.delete(key); }
+}
+addEventListener('hashchange',showTarget);showTarget();
+</script></body></html>
+

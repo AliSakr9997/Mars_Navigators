@@ -46,7 +46,7 @@ const DEFAULT_TELEMETRY: TelemetryResponse = {
 };
 
 export default function App() {
-  const [activeView, setActiveView] = useState<'landing' | 'console' | 'traverse'>('landing');
+  const [activeView, setActiveView] = useState<'landing' | 'console' | 'traverse'>('traverse');
   const [startPoint, setStartPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[0]);
   const [destPoint, setDestPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[1]);
   const [waypoints, setWaypoints] = useState<Waypoint[]>(INITIAL_WAYPOINTS);
@@ -594,3 +594,4 @@ export default function App() {
     </div>
   );
 }
+
