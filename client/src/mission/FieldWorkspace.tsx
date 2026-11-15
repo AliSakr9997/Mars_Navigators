@@ -1,13 +1,13 @@
 import {useEffect, useRef, useState} from 'react';
-import {Activity, Compass, Layers, MapPin, Orbit, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
-import App from '../App';
+import {Activity, Compass, Database, MapPin, Orbit, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
+import {AttributionModal} from '../components/AttributionModal';
 import catalog from './catalog.json';
 import './workspace.css';
 
 const screens = [
   {name:'Field console',icon:Compass,url:'/field/index.html'},
   {name:'Suit readings',icon:Activity,url:'/field/suit.html'},
-  {name:'Traverse planner',icon:Layers,url:''}
+
 ];
 const defaults={name:'ARES-Gale',phase:'Traverse planning',group:0,target:0};
 function loadMission(){
@@ -21,6 +21,7 @@ type Point=[number,number];
 type Readout={d:number;risk:number;time:number};
 export default function FieldWorkspace(){
   const [mission,setMission]=useState<typeof defaults>(loadMission);
+  const [sources,showSources]=useState(false);
   const [screen,show]=useState(0);
   const [collapsed,collapse]=useState(()=>window.innerWidth<760);
   const [start,setStart]=useState<Point|null>(null);
@@ -58,14 +59,6 @@ export default function FieldWorkspace(){
     }
     return ()=>controller.abort();
   },[target,start?.[0],start?.[1],limit]);
-  const [extent,setExtent]=useState<{west:number;north:number;east:number;south:number}|null>(null);
-  useEffect(()=>{fetch('/api/field/extent').then(r=>r.ok?r.json():null).then(setExtent).catch(()=>{});},[]);
-  function geographic(p:Point|null,name:string){
-    if(!extent||!p)return undefined;
-    return {lng:extent.west+p[0]*(extent.east-extent.west),lat:extent.north+p[1]*(extent.south-extent.north),name};
-  }
-  const geoStart=geographic(start,'EVA Start'),geoEnd=geographic(end,'EVA Target');
-  function pick(which:string){show(0);send('pick',{which});if(innerWidth<760)collapse(true);}
   const distances=Object.values(metrics).filter(Boolean).map(v=>v.d);
   return <main className={'field-workspace'+(collapsed?' rail-closed':'')}>
     <aside className="field-rail" aria-label="Mission sidebar">
@@ -81,14 +74,16 @@ export default function FieldWorkspace(){
         const m=metrics[site.name];
         return <button className="field-site" key={site.name} onClick={()=>{show(0);send('site',{name:site.name})}}><span><MapPin size={14}/>{site.name}</span><small>{m?(distances.length===target.sites.length&&m.d===Math.min(...distances)?'Nearest · ':'')+m.d.toFixed(2)+' km · '+m.risk+'% risk':!start?'Shown on map':m===null?'Route unavailable':'Calculating…'}</small></button>;
       })}
-      <div className="field-picks"><button onClick={()=>pick('a')}>Set start</button><button onClick={()=>pick('b')}>Set end</button></div>
-      <small aria-live="polite">{!start?'Click the map to set EVA Start.':!end?'Click the map to set EVA Target.':'Start and target set.'}</small></section>
+      <small aria-live="polite">{!start?'Click the map to set EVA Start.':!end?'Click the map to set EVA Target.':'Start and target set.'}</small></section><button className="sources-button" onClick={()=>showSources(true)}><Database size={14}/> Data sources</button>
     </aside>
     <div className="field-content">
       {collapsed&&<button className="rail-open" onClick={()=>collapse(false)}><PanelLeftOpen size={16}/> Mission options</button>}
       <iframe ref={field} title="Field console" src="/field/index.html" hidden={screen!==0} onLoad={sync}/>
-      {screen>0&&(screens[screen].url?<iframe key={screen} title={screens[screen].name} src={screens[screen].url}/>:<App missionName={mission.name} initialStart={geoStart} initialEnd={geoEnd}/>)}
+      {screen>0&&<iframe key={screen} title={screens[screen].name} src={screens[screen].url}/>}
     </div>
+    <AttributionModal isOpen={sources} onClose={()=>showSources(false)}/>
   </main>
 }
+
+
 

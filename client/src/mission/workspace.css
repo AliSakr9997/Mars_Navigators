@@ -16,3 +16,4 @@
 .field-content{display:flex;flex-direction:column;min-width:0;overflow:auto}.field-content iframe{width:100%;flex:1;border:0;min-height:0}.field-content iframe[hidden]{display:none}
 .rail-open{align-self:flex-start;margin:6px;padding:6px 12px}
 @media(max-width:759px){.field-workspace{grid-template-columns:minmax(0,1fr)}.field-rail{position:absolute;z-index:5;inset:0 auto 0 0;width:min(82vw,270px);box-shadow:10px 0 35px #10070999}}
+.field-rail .sources-button{margin:16px 0;display:flex;align-items:center;gap:8px;padding:7px 10px}

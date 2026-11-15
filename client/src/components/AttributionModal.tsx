@@ -14,8 +14,8 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
       num: '01',
       title: 'Curiosity / REMS',
       subtitle: 'Daily meteorology · Gale Crater',
-      desc1: 'Sols 4989–4995, 19–25 Aug 2026. Ground min/max and pressure are reported values.',
-      desc2: 'The feed returns a qualitative UV category. Wind is blank for Sol 4995.',
+      desc1: 'Surface temperature and atmospheric pressure come from the mission telemetry snapshot.',
+      desc2: 'Wind speed and UV category are shown when available.',
       linkText: 'NASA/JPL-Caltech · REMS team, CAB (CSIC–INTA) ↗',
       url: 'https://mars.nasa.gov/msl/mission/instruments/rems/'
     },
@@ -188,4 +188,5 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
     </div>
   );
 };
+
 
