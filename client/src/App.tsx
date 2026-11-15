@@ -7,9 +7,10 @@ import { RoutePlannerPanel } from './components/RoutePlannerPanel';
 import { TelemetryPanel } from './components/TelemetryPanel';
 import { SuitTelemetryModal } from './components/SuitTelemetryModal';
 import { AttributionModal } from './components/AttributionModal';
+import { NasaTrekModal } from './components/NasaTrekModal';
 import { Waypoint, RouteResponse, TelemetryResponse } from './types/api';
 import { computeRealMarsRoute } from './utils/marsPathfindingEngine';
-import { ArrowLeft, Home, Sparkles } from 'lucide-react';
+import { ArrowLeft, Home, Sparkles, Globe } from 'lucide-react';
 
 const INITIAL_WAYPOINTS: Waypoint[] = [
   { lat: -4.6620, lng: 137.4120, name: 'Curiosity Sol 4000', elevation_m: -4462.0 },
@@ -70,7 +71,26 @@ export default function App() {
 
   const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
   const [isSuitTelemetryOpen, setIsSuitTelemetryOpen] = useState<boolean>(false);
+  const [isNasaTrekOpen, setIsNasaTrekOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSelectRouteOption = (optionId: string) => {
+    if (!routeResult || !routeResult.options) return;
+    const selected = routeResult.options.find(o => o.id === optionId);
+    if (!selected) return;
+
+    setRouteResult(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        activeOptionId: optionId,
+        summary: selected.summary,
+        route_coordinates: selected.route_coordinates,
+        elevation_profile: selected.elevation_profile,
+        pnr: selected.pnr
+      };
+    });
+  };
 
   const handleToggleLayer = (key: keyof MapLayersState) => {
     setLayers(prev => ({ ...prev, [key]: !prev[key] }));
@@ -301,6 +321,28 @@ export default function App() {
                 </div>
               </div>
 
+              {/* NASA Mars Trek Portal */}
+              <button
+                onClick={() => setIsNasaTrekOpen(true)}
+                style={{
+                  backgroundColor: '#302923',
+                  border: '1px solid #f1a16e',
+                  color: '#f1a16e',
+                  borderRadius: '5px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+                title="Open NASA Mars Trek Interactive Map"
+              >
+                <Globe size={13} />
+                NASA Trek (3D) &nbsp;↗
+              </button>
+
               {/* Sources link */}
               <button
                 onClick={() => setIsAttributionOpen(true)}
@@ -344,6 +386,8 @@ export default function App() {
                 activeHoverCoord={activeHoverCoord}
                 layers={layers}
                 onToggleLayer={handleToggleLayer}
+                onSelectOption={handleSelectRouteOption}
+                onOpenNasaTrek={() => setIsNasaTrekOpen(true)}
               />
 
               <RoutePlannerPanel
@@ -359,6 +403,8 @@ export default function App() {
                 onComputeRoute={handleComputeRoute}
                 onClearRoute={handleClearRoute}
                 loading={loading}
+                route={routeResult}
+                onSelectOption={handleSelectRouteOption}
               />
             </div>
 
@@ -590,6 +636,15 @@ export default function App() {
         isOpen={isSuitTelemetryOpen}
         onClose={() => setIsSuitTelemetryOpen(false)}
         telemetry={telemetry}
+      />
+
+      <NasaTrekModal
+        isOpen={isNasaTrekOpen}
+        onClose={() => setIsNasaTrekOpen(false)}
+        onOpenRoutePlanner={() => {
+          setIsNasaTrekOpen(false);
+          setActiveView('traverse');
+        }}
       />
     </div>
   );

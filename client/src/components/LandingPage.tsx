@@ -1,5 +1,6 @@
-import React from 'react';
-import { Compass, MapPin, ShieldCheck, Activity, Mountain, ArrowRight, Sparkles, Radio } from 'lucide-react';
+import React, { useState } from 'react';
+import { Compass, MapPin, ShieldCheck, Activity, Mountain, ArrowRight, Sparkles, Radio, Globe, ExternalLink } from 'lucide-react';
+import { NasaTrekModal } from './NasaTrekModal';
 
 interface LandingPageProps {
   onStartJourney: () => void;
@@ -10,6 +11,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onStartJourney,
   onOpenConsole
 }) => {
+  const [isTrekModalOpen, setIsTrekModalOpen] = useState<boolean>(false);
+  const [isMarsHovered, setIsMarsHovered] = useState<boolean>(false);
   return (
     <div style={{
       minHeight: '100vh',
@@ -164,25 +167,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           THE MARS NAVIGATORS
         </h1>
 
-        {/* 3D Hovering Mars Planet Container */}
-        <div style={{
-          position: 'relative',
-          width: 'clamp(260px, 32vw, 360px)',
-          height: 'clamp(260px, 32vw, 360px)',
-          margin: '15px auto 30px auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        {/* 3D Hovering Mars Planet Container (Interactive Click to Open NASA Trek) */}
+        <div
+          onClick={() => setIsTrekModalOpen(true)}
+          onMouseEnter={() => setIsMarsHovered(true)}
+          onMouseLeave={() => setIsMarsHovered(false)}
+          title="Click to explore Mars on NASA Trek (3D/2D)"
+          style={{
+            position: 'relative',
+            width: 'clamp(260px, 32vw, 360px)',
+            height: 'clamp(260px, 32vw, 360px)',
+            margin: '15px auto 30px auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+        >
           {/* Subtle Outer Orbital Ring */}
           <div style={{
             position: 'absolute',
             width: '128%',
             height: '128%',
             borderRadius: '50%',
-            border: '1px dashed rgba(241, 161, 110, 0.25)',
+            border: isMarsHovered ? '1px dashed rgba(241, 161, 110, 0.7)' : '1px dashed rgba(241, 161, 110, 0.25)',
             transform: 'rotateX(75deg)',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            transition: 'all 0.3s'
           }} />
 
           {/* Mars Sphere with Floating Animation & Realistic 3D Atmosphere */}
@@ -192,14 +203,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             borderRadius: '50%',
             overflow: 'hidden',
             position: 'relative',
-            boxShadow: `
+            boxShadow: isMarsHovered ? `
+              0 0 65px rgba(224, 108, 58, 0.6),
+              0 0 120px rgba(241, 161, 110, 0.35),
+              inset -35px -35px 70px rgba(0, 0, 0, 0.95),
+              inset 15px 15px 40px rgba(255, 210, 170, 0.35)
+            ` : `
               0 0 50px rgba(224, 108, 58, 0.35),
               0 0 100px rgba(241, 161, 110, 0.2),
               inset -35px -35px 70px rgba(0, 0, 0, 0.95),
               inset 15px 15px 40px rgba(255, 210, 170, 0.25)
             `,
-            border: '1px solid rgba(241, 161, 110, 0.4)',
-            animation: 'marsFloat 6s ease-in-out infinite'
+            border: isMarsHovered ? '2px solid rgba(241, 161, 110, 0.8)' : '1px solid rgba(241, 161, 110, 0.4)',
+            animation: 'marsFloat 6s ease-in-out infinite',
+            transition: 'all 0.3s'
           }}>
             <img
               src="/mars_globe.jpg"
@@ -241,18 +258,50 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 boxShadow: '0 0 10px #f1a16e'
               }} />
             </div>
+
+            {/* Hover overlay hint */}
+            <div style={{
+              position: 'absolute',
+              bottom: '16px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'rgba(21, 18, 16, 0.85)',
+              border: '1px solid #f1a16e',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '11px',
+              color: '#f3e7d8',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              opacity: isMarsHovered ? 1 : 0.75,
+              transition: 'opacity 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <Globe size={12} color="#f1a16e" />
+              <span>CLICK TO EXPLORE NASA TREK 🪐</span>
+            </div>
           </div>
         </div>
 
-        {/* Big Call to Action Button Under Mars */}
-        <div style={{ marginBottom: '28px' }}>
+        {/* Action Buttons Under Mars (Start Journey + Explore NASA Trek) */}
+        <div style={{
+          marginBottom: '28px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '14px',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
           <button
             onClick={onStartJourney}
             style={{
               backgroundColor: '#f1a16e',
               border: 'none',
               borderRadius: '8px',
-              padding: '16px 42px',
+              padding: '16px 38px',
               fontSize: '20px',
               fontWeight: 700,
               fontFamily: "'Barlow Condensed', sans-serif",
@@ -275,6 +324,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             }}
           >
             START YOUR JOURNEY &nbsp;→
+          </button>
+
+          <button
+            onClick={() => setIsTrekModalOpen(true)}
+            style={{
+              backgroundColor: '#201c19',
+              border: '1px solid #7c4c31',
+              borderRadius: '8px',
+              padding: '16px 28px',
+              fontSize: '18px',
+              fontWeight: 700,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              letterSpacing: '1px',
+              color: '#f1a16e',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              transition: 'all 0.25s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#2c241f';
+              e.currentTarget.style.borderColor = '#f1a16e';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#201c19';
+              e.currentTarget.style.borderColor = '#7c4c31';
+              e.currentTarget.style.color = '#f1a16e';
+            }}
+          >
+            <Globe size={20} color="#f1a16e" />
+            NASA MARS TREK (3D / 2D) &nbsp;↗
           </button>
         </div>
 
@@ -451,6 +533,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           }
         }
       `}</style>
+
+      {/* NASA Mars Trek Interactive Portal Modal */}
+      <NasaTrekModal
+        isOpen={isTrekModalOpen}
+        onClose={() => setIsTrekModalOpen(false)}
+        onOpenRoutePlanner={onStartJourney}
+      />
     </div>
   );
 };

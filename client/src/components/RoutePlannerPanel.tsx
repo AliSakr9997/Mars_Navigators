@@ -1,6 +1,6 @@
 import React from 'react';
-import { Waypoint } from '../types/api';
-import { Crosshair, ChevronDown, Plus, Minus, Zap, Shield, Compass } from 'lucide-react';
+import { Waypoint, RouteResponse, RouteOption } from '../types/api';
+import { Crosshair, ChevronDown, Plus, Minus, Zap, Shield, Compass, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface RoutePlannerPanelProps {
   start: Waypoint;
@@ -15,6 +15,8 @@ interface RoutePlannerPanelProps {
   onComputeRoute: () => void;
   onClearRoute: () => void;
   loading: boolean;
+  route?: RouteResponse | null;
+  onSelectOption?: (optionId: string) => void;
 }
 
 export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
@@ -29,13 +31,18 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
   onChangeMaxSlope,
   onComputeRoute,
   onClearRoute,
-  loading
+  loading,
+  route,
+  onSelectOption
 }) => {
   const modes = [
-    { id: 'Balanced', label: 'Safe EVA', risk: '14%', color: '#f1a16e' },
-    { id: 'Shortest distance', label: 'Direct / Quick Return', risk: '44%', color: '#f1c680' },
-    { id: 'Safest (max clearance)', label: 'Ridge traverse', risk: '45%', color: '#d5a39d' }
+    { id: 'Balanced', label: 'P1: Balanced EVA (Best)', risk: '12%', color: '#00e676' },
+    { id: 'Flattest', label: 'P2: Flattest / Low Climb', risk: '8%', color: '#f59e0b' },
+    { id: 'Safest (max clearance)', label: 'P3: Max Hazard Clearance', risk: '18%', color: '#06b6d4' }
   ];
+
+  const activeOptionId = route?.activeOptionId || 'P1';
+  const activeOpt = route?.options?.find(o => o.id === activeOptionId) || route?.options?.[0];
 
   return (
     <div style={{
@@ -61,9 +68,9 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             Route planner
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f1c680' }} />
-            <span style={{ fontSize: '13px', color: '#f1c680' }}>
-              Online
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00e676' }} />
+            <span style={{ fontSize: '13px', color: '#00e676', fontWeight: 600 }}>
+              ARES v5 Engine
             </span>
           </div>
         </div>
@@ -80,7 +87,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             letterSpacing: '1px',
             marginBottom: '6px'
           }}>
-            START
+            START WAYPOINT
           </label>
           <div style={{
             position: 'relative',
@@ -132,7 +139,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             letterSpacing: '1px',
             marginBottom: '6px'
           }}>
-            TARGET
+            TARGET WAYPOINT
           </label>
           <div style={{
             position: 'relative',
@@ -184,7 +191,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             letterSpacing: '1px',
             marginBottom: '6px'
           }}>
-            PRESET WAYPOINTS
+            QUICK TARGETS (GALE CRATER)
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {waypoints.slice(0, 3).map(wp => (
@@ -197,7 +204,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  color: '#f2e7d8',
+                  color: destination.name === wp.name ? '#f1a16e' : '#f2e7d8',
                   fontSize: '13px',
                   padding: '4px 0',
                   cursor: 'pointer',
@@ -215,87 +222,160 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
 
         <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '16px' }} />
 
-        {/* Routing Mode / Alternatives */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: '11px',
-              color: '#bdb0a2',
-              letterSpacing: '1px'
-            }}>
-              ROUTING MODE / ALTERNATIVES
-            </span>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: '11px',
-              color: '#bdb0a2'
-            }}>
-              RISK %
-            </span>
-          </div>
+        {/* Multi-Candidate Route Selection (from Omar's Planner) */}
+        {route?.options && route.options.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '11px',
+                color: '#bdb0a2',
+                letterSpacing: '1px'
+              }}>
+                SELECT CANDIDATE ROUTE (3 OPTIONS)
+              </span>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '11px',
+                color: '#bdb0a2'
+              }}>
+                LENGTH
+              </span>
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {modes.map(m => {
-              const active = selectedMode === m.id;
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => onSelectMode(m.id)}
-                  style={{
-                    backgroundColor: active ? '#433329' : '#201c19',
-                    border: active ? '1px solid #9b6947' : '1px solid transparent',
-                    borderRadius: '5px',
-                    padding: '8px 12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '50%',
-                      border: `1px solid ${m.color}`,
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {route.options.map(opt => {
+                const active = opt.id === activeOptionId;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => onSelectOption && onSelectOption(opt.id)}
+                    style={{
+                      backgroundColor: active ? '#2c241e' : '#201c19',
+                      border: active ? `1px solid ${opt.color}` : '1px solid #332822',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      {active && (
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: m.color }} />
-                      )}
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        border: `1px solid ${opt.color}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {active && (
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: opt.color }} />
+                        )}
+                      </div>
+                      <span style={{
+                        fontSize: '13px',
+                        fontWeight: active ? 600 : 400,
+                        color: active ? '#ffffff' : '#f2e7d8'
+                      }}>
+                        {opt.title}
+                      </span>
                     </div>
                     <span style={{
-                      fontSize: '14px',
-                      fontWeight: active ? 600 : 400,
-                      color: active ? '#f2e7d8' : '#bdb0a2'
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: opt.color
                     }}>
-                      {m.label}
+                      {opt.summary.total_distance_km} km
                     </span>
-                  </div>
-                  <span style={{
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dynamic "Why this route?" Explanation Box */}
+            {activeOpt && (
+              <div style={{
+                backgroundColor: '#181412',
+                border: `1px solid ${activeOpt.color}`,
+                borderRadius: '8px',
+                padding: '10px 12px',
+                marginTop: '10px'
+              }}>
+                <div style={{
+                  fontSize: '11px',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  color: activeOpt.color,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  <Sparkles size={12} />
+                  <span>WHY THIS ROUTE?</span>
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#f2e7d8',
+                  marginTop: '4px',
+                  lineHeight: 1.4
+                }}>
+                  {activeOpt.why}
+                </div>
+              </div>
+            )}
+
+            {/* Point of No Return (PNR) Safety Indicator */}
+            {activeOpt?.pnr && (
+              <div style={{
+                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                border: '1px solid #a855f7',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                marginTop: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{
+                    fontSize: '11px',
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: m.color
+                    color: '#d8b4fe',
+                    fontWeight: 600
                   }}>
-                    {m.risk}
-                  </span>
-                </button>
-              );
-            })}
+                    POINT OF NO RETURN (PNR)
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#f2e7d8', marginTop: '2px' }}>
+                    Turn-around at <b>km {activeOpt.pnr.km.toFixed(1)}</b> of {activeOpt.summary.total_distance_km} km
+                  </div>
+                </div>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: activeOpt.pnr.safe ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                  color: activeOpt.pnr.safe ? '#10b981' : '#f87171'
+                }}>
+                  {activeOpt.pnr.safe ? 'SAFE RETURN' : 'CAUTION'}
+                </span>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Maximum Allowed Slope Adjustment */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          marginTop: '12px'
         }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace",
@@ -368,15 +448,18 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
               backgroundColor: '#f1a16e',
               border: '1px solid #f1a16e',
               borderRadius: '6px',
-              height: '36px',
+              height: '38px',
               color: '#151210',
-              fontSize: '14px',
-              fontWeight: 600,
+              fontSize: '15px',
+              fontWeight: 700,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              letterSpacing: '0.8px',
               cursor: loading ? 'wait' : 'pointer',
-              opacity: loading ? 0.7 : 1
+              opacity: loading ? 0.7 : 1,
+              boxShadow: '0 4px 14px rgba(241, 161, 110, 0.3)'
             }}
           >
-            {loading ? 'Computing...' : 'Compute Route'}
+            {loading ? 'CALCULATING 3 ROUTES...' : 'FIND PATHS (3 ROUTES) →'}
           </button>
           <button
             onClick={onClearRoute}
@@ -385,14 +468,14 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
               backgroundColor: '#302923',
               border: '1px solid #443a33',
               borderRadius: '6px',
-              height: '36px',
+              height: '38px',
               color: '#f2e7d8',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer'
             }}
           >
-            Clear Route
+            Reset
           </button>
         </div>
       </div>
@@ -400,10 +483,10 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
       {/* Footer Notes */}
       <div style={{ borderTop: '1px solid #332922', paddingTop: '10px' }}>
         <div style={{ fontSize: '13px', fontWeight: 500, color: '#f1c680', marginBottom: '4px' }}>
-          Local model · EVA simulation
+          NASA JPL / USGS Mars Models
         </div>
         <div style={{ fontSize: '12px', color: '#8c7d70', lineHeight: 1.4 }}>
-          Risk percentages use illustrative terrain and sample inputs.
+          Calculates Best + Alternative paths with Tobler walking speed, Minetti metabolic energy, and Point of No Return.
         </div>
       </div>
     </div>

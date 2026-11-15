@@ -38,10 +38,35 @@ export interface RouteSummary {
   time_min?: number;
   estimated_eva_time_hours: number;
   energy_kj?: number;
+  energy_kcal?: number;
+  oxygen_used_l?: number;
+  battery_used_kwh?: number;
+  radiation_dose_msv?: number;
   risk_score?: number;
   min_clear_m?: number;
   hazard_level: string;
   hazard_hits?: number;
+  pnr_km?: number;
+  pnr_coord?: [number, number];
+  pnr_safe?: boolean;
+}
+
+export interface RouteOption {
+  id: string; // 'P1', 'P2', 'P3'
+  title: string; // 'BEST (Balanced)', 'ALTERNATIVE (Flattest)', 'BACKUP (Max Clearance)'
+  feature: string;
+  why: string;
+  color: string;
+  summary: RouteSummary;
+  route_coordinates: [number, number][];
+  elevation_profile: ElevationPoint[];
+  pnr: {
+    index: number;
+    km: number;
+    coord: [number, number];
+    safe: boolean;
+    warning?: string;
+  };
 }
 
 export interface RouteResponse {
@@ -60,6 +85,15 @@ export interface RouteResponse {
   route_coordinates: [number, number][]; // [lat, lng] array for Leaflet polyline
   elevation_profile: ElevationPoint[];
   traversed_geology: TraversedGeology[];
+  pnr?: {
+    index: number;
+    km: number;
+    coord: [number, number];
+    safe: boolean;
+    warning?: string;
+  };
+  options?: RouteOption[];
+  activeOptionId?: string;
 }
 
 export interface CandidateRoute {
