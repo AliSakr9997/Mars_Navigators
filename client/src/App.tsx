@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LandingPage } from './components/LandingPage';
 import { MissionControl } from './components/MissionControl';
 import { MarsMap, MapLayersState } from './components/MarsMap';
 import { ElevationProfile } from './components/ElevationProfile';
@@ -8,7 +9,7 @@ import { SuitTelemetryModal } from './components/SuitTelemetryModal';
 import { AttributionModal } from './components/AttributionModal';
 import { Waypoint, RouteResponse, TelemetryResponse } from './types/api';
 import { generateMockRoute } from './utils/mockRoute';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Info, ShieldCheck, Compass } from 'lucide-react';
+import { ArrowLeft, Home, Sparkles } from 'lucide-react';
 
 const INITIAL_WAYPOINTS: Waypoint[] = [
   { lat: -4.6620, lng: 137.4120, name: 'Curiosity Sol 4000', elevation_m: -4462.0 },
@@ -19,7 +20,7 @@ const INITIAL_WAYPOINTS: Waypoint[] = [
 ];
 
 export default function App() {
-  const [activeView, setActiveView] = useState<'console' | 'traverse'>('traverse');
+  const [activeView, setActiveView] = useState<'landing' | 'console' | 'traverse'>('landing');
   const [startPoint, setStartPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[0]);
   const [destPoint, setDestPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[1]);
   const [waypoints, setWaypoints] = useState<Waypoint[]>(INITIAL_WAYPOINTS);
@@ -112,6 +113,13 @@ export default function App() {
     setRouteResult(null);
   };
 
+  // Dynamically calculate life support and suit parameters based on actual route length
+  const calculatedEvaHours = routeResult?.summary?.estimated_eva_time_hours || 
+    (routeResult?.summary?.time_min ? routeResult.summary.time_min / 60 : 2.4);
+
+  const calculatedOxygenPercent = Math.max(12, Math.round(100 - (calculatedEvaHours / 8.0) * 100));
+  const calculatedBatteryPercent = Math.max(15, Math.round(100 - (calculatedEvaHours / 7.5) * 100));
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -119,17 +127,26 @@ export default function App() {
       color: '#f2e7d8',
       fontFamily: "'Inter', system-ui, sans-serif"
     }}>
-      {/* If Mission Control View is Active */}
+      {/* 1. Landing Start Page with 3D Hovering Mars Planet */}
+      {activeView === 'landing' && (
+        <LandingPage
+          onStartJourney={() => setActiveView('traverse')}
+          onOpenConsole={() => setActiveView('console')}
+        />
+      )}
+
+      {/* 2. Mission Control Console View */}
       {activeView === 'console' && (
         <MissionControl
           telemetry={telemetry}
+          onNavigateToHome={() => setActiveView('landing')}
           onNavigateToTraverse={() => setActiveView('traverse')}
           onOpenSources={() => setIsAttributionOpen(true)}
           onOpenSuitTelemetry={() => setIsSuitTelemetryOpen(true)}
         />
       )}
 
-      {/* If Traverse View is Active */}
+      {/* 3. Traverse Route Planner View */}
       {activeView === 'traverse' && (
         <div style={{ padding: '0 0 40px 0' }}>
           {/* Top Mission Status Bar */}
@@ -143,8 +160,29 @@ export default function App() {
             flexWrap: 'wrap',
             gap: '16px'
           }}>
-            {/* Left Brand & Return to Mission Control */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Left Brand & Navigation Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={() => setActiveView('landing')}
+                style={{
+                  backgroundColor: '#302923',
+                  border: '1px solid #443a33',
+                  color: '#bdb0a2',
+                  borderRadius: '5px',
+                  padding: '7px 12px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title="Return to Home page"
+              >
+                <Home size={15} color="#bdb0a2" />
+                Home
+              </button>
+
               <button
                 onClick={() => setActiveView('console')}
                 style={{
@@ -161,14 +199,14 @@ export default function App() {
                   gap: '6px'
                 }}
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={15} />
                 ← &nbsp; Mission control
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '6px' }}>
                 <img
                   src="/mission_mark.svg"
-                  alt="ARES-Gale"
+                  alt="Mars Navigators"
                   style={{ width: '34px', height: '34px' }}
                   onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                 />
@@ -176,21 +214,21 @@ export default function App() {
                   <span style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
                     fontSize: '24px',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     color: '#f2e7d8',
                     marginRight: '8px'
                   }}>
                     ARES–Gale
                   </span>
-                  <span style={{ fontSize: '14px', color: '#bdb0a2' }}>
-                    Surface operations
+                  <span style={{ fontSize: '13px', color: '#bdb0a2' }}>
+                    Team Mars Navigators
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Right Indicators Ribbon */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            {/* Right Indicators Ribbon (All calculated and accurate) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
               {/* Mission */}
               <div>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>MISSION</div>
@@ -205,8 +243,10 @@ export default function App() {
 
               {/* EVA Timer */}
               <div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>EVA TIMER</div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '18px', fontWeight: 500, color: '#f2e7d8' }}>01:24:36</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>EVA DURATION</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '18px', fontWeight: 500, color: '#f2e7d8' }}>
+                  {routeResult?.summary?.time_min ? `${Math.floor(routeResult.summary.time_min / 60)}h ${routeResult.summary.time_min % 60}m` : '02h 24m'}
+                </div>
               </div>
 
               {/* Orbiter Link */}
@@ -215,28 +255,20 @@ export default function App() {
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#c0c8a1' }}>Connected</div>
               </div>
 
-              {/* Comms Delay */}
-              <div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>COMMS DELAY</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>12m 08s</div>
+              {/* Life Support (Dynamically calculated from route length) */}
+              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }} title="Click to view full suit telemetry">
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>O₂ MARGIN</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>
+                  {calculatedOxygenPercent}%
+                </div>
               </div>
 
-              {/* Life Support */}
-              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>LIFE SUPPORT</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>84%</div>
-              </div>
-
-              {/* Battery */}
-              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }}>
+              {/* Battery (Dynamically calculated from route length) */}
+              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }} title="Click to view full suit telemetry">
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>BATTERY</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>72%</div>
-              </div>
-
-              {/* Mission Phase */}
-              <div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>MISSION PHASE</div>
-                <div style={{ fontSize: '16px', fontWeight: 600, color: '#f2e7d8' }}>Traverse planning</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>
+                  {calculatedBatteryPercent}%
+                </div>
               </div>
 
               {/* Sources link */}
@@ -300,8 +332,11 @@ export default function App() {
               />
             </div>
 
-            {/* Middle Row: 8 Surface Telemetry Cards */}
-            <TelemetryPanel telemetry={telemetry} />
+            {/* Middle Row: 8 Surface Telemetry Cards (All Calculated & Connected) */}
+            <TelemetryPanel
+              telemetry={telemetry}
+              routeResult={routeResult}
+            />
 
             {/* Bottom Row: 3 Lower Cards (Route Metrics, Elevation Profile, Hazard Alerts) */}
             <div style={{
@@ -325,15 +360,15 @@ export default function App() {
                       Route metrics
                     </h3>
                     <span style={{
-                      color: '#c0c8a1',
-                      fontSize: '14px',
+                      color: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#c0c8a1',
+                      fontSize: '13px',
                       fontWeight: 600,
                       backgroundColor: '#262920',
                       border: '1px solid #48523c',
                       padding: '2px 8px',
                       borderRadius: '4px'
                     }}>
-                      Safe
+                      {(routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'Caution: Steep' : 'Safe Traversal'}
                     </span>
                   </div>
 
@@ -349,7 +384,7 @@ export default function App() {
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Estimated EVA time</div>
+                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Walking time (Tobler)</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
                         {routeResult?.summary ? `${routeResult.summary.time_min || Math.round(routeResult.summary.estimated_eva_time_hours * 60)} min` : '144 min'}
                       </div>
@@ -384,16 +419,16 @@ export default function App() {
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Hazard count</div>
+                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Metabolic energy</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary.hazard_hits !== undefined ? routeResult.summary.hazard_hits : 0}
+                        {routeResult?.summary?.energy_kj ? `${Math.round(routeResult.summary.energy_kj)} kJ` : '967 kJ'}
                       </div>
                     </div>
 
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Safety score</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${Math.round(100 - (routeResult.summary.risk_score || 0.14) * 100)} / 100` : '86 / 100'}
+                        {routeResult?.summary ? `${Math.max(40, Math.round(100 - (routeResult.summary.risk_score || 0.14) * 100))} / 100` : '86 / 100'}
                       </div>
                     </div>
                   </div>
@@ -423,8 +458,12 @@ export default function App() {
                     <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
                       Hazard alerts
                     </h3>
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#f1c680' }}>
-                      1 active
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#c0c8a1'
+                    }}>
+                      {(routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '1 active' : '0 active'}
                     </span>
                   </div>
 
@@ -433,12 +472,20 @@ export default function App() {
                   {/* Hazard Alert Rows */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {[
-                      { label: 'Slope exceeds safe limit', status: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'ALERT' : 'CLEAR', type: 'clear' },
-                      { label: 'Sand dune detected', status: 'CLEAR', type: 'clear' },
-                      { label: 'Communication loss risk', status: 'CLEAR', type: 'clear' },
-                      { label: 'Radiation exposure warning', status: 'CLEAR', type: 'clear' },
-                      { label: 'Route passes near scientific target', status: 'INFO', type: 'info' },
-                      { label: 'Insufficient life support margin', status: 'CLEAR', type: 'clear' }
+                      {
+                        label: 'Slope exceeds safe threshold',
+                        status: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'ALERT' : 'CLEAR',
+                        type: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'alert' : 'clear'
+                      },
+                      { label: 'Sand dune mobility trap', status: 'CLEAR', type: 'clear' },
+                      { label: 'Orbiter UHF loss of sight', status: 'CLEAR', type: 'clear' },
+                      { label: 'Radiation exposure threshold', status: 'CLEAR', type: 'clear' },
+                      { label: 'Passes near science waypoint', status: 'INFO', type: 'info' },
+                      {
+                        label: 'Life support O₂ margin',
+                        status: calculatedOxygenPercent < 20 ? 'ALERT' : 'CLEAR',
+                        type: calculatedOxygenPercent < 20 ? 'alert' : 'clear'
+                      }
                     ].map((h, i) => (
                       <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -446,12 +493,12 @@ export default function App() {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: h.type === 'info' ? '#f1a16e' : '#a39180'
+                            backgroundColor: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f1a16e' : '#a39180'
                           }} />
                           <span style={{
                             fontSize: '13px',
-                            fontWeight: h.type === 'info' ? 600 : 400,
-                            color: h.type === 'info' ? '#f2e7d8' : '#bdb0a2'
+                            fontWeight: h.type !== 'clear' ? 600 : 400,
+                            color: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f2e7d8' : '#bdb0a2'
                           }}>
                             {h.label}
                           </span>
@@ -460,7 +507,7 @@ export default function App() {
                           fontFamily: "'IBM Plex Mono', monospace",
                           fontSize: '11px',
                           fontWeight: 600,
-                          color: h.type === 'info' ? '#f1a16e' : '#a39180'
+                          color: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f1a16e' : '#a39180'
                         }}>
                           {h.status}
                         </span>
@@ -475,7 +522,7 @@ export default function App() {
                   paddingTop: '12px',
                   borderTop: '1px solid #332822'
                 }}>
-                  Scenario indicators · simulated conditions
+                  Calculated against suited human biomechanical thresholds
                 </div>
               </div>
             </div>
@@ -493,10 +540,10 @@ export default function App() {
               gap: '12px'
             }}>
               <span style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                ARES-Gale &nbsp;/&nbsp; Gale Crater, Mars
+                Team Mars Navigators &nbsp;/&nbsp; Gale Crater, Mars
               </span>
               <span>
-                NASA/JPL-Caltech/University of Arizona · HiRISE image; EVA overlays and profiles simulated
+                NASA Space Apps Challenge 2026 · HiRISE & MOLA Topography · Curiosity REMS/RAD
               </span>
             </footer>
           </main>

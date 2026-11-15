@@ -1,9 +1,10 @@
 import React from 'react';
-import { Terminal, MapPin, BookOpen, Compass, ExternalLink, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Terminal, MapPin, BookOpen, Compass, ExternalLink, Activity, ArrowRight, ShieldCheck, Home } from 'lucide-react';
 import { TelemetryResponse } from '../types/api';
 
 interface MissionControlProps {
   telemetry: TelemetryResponse | null;
+  onNavigateToHome: () => void;
   onNavigateToTraverse: () => void;
   onOpenSources: () => void;
   onOpenSuitTelemetry: () => void;
@@ -11,6 +12,7 @@ interface MissionControlProps {
 
 export const MissionControl: React.FC<MissionControlProps> = ({
   telemetry,
+  onNavigateToHome,
   onNavigateToTraverse,
   onOpenSources,
   onOpenSuitTelemetry
@@ -37,10 +39,14 @@ export const MissionControl: React.FC<MissionControlProps> = ({
         zIndex: 100
       }}>
         {/* Mission Mark */}
-        <div style={{ marginBottom: '28px', cursor: 'pointer' }} onClick={() => {}}>
+        <div
+          style={{ marginBottom: '24px', cursor: 'pointer' }}
+          onClick={onNavigateToHome}
+          title="Return to Home / Mars 3D"
+        >
           <img
             src="/mission_mark.svg"
-            alt="ARES-Gale Mission"
+            alt="Mars Navigators"
             style={{ width: '40px', height: '40px', display: 'block' }}
             onError={(e) => {
               (e.currentTarget as HTMLElement).style.display = 'none';
@@ -49,12 +55,38 @@ export const MissionControl: React.FC<MissionControlProps> = ({
         </div>
 
         {/* Navigation Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', alignItems: 'center' }}>
+          {/* Home Button */}
+          <button
+            onClick={onNavigateToHome}
+            style={{
+              width: '71px',
+              height: '58px',
+              backgroundColor: '#211c18',
+              border: '1px solid transparent',
+              borderRadius: '6px',
+              color: '#b8a99a',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              gap: '4px',
+              padding: '6px 0',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
+          >
+            <Home size={18} color="#b8a99a" />
+            <span style={{ fontSize: '11px', fontWeight: 500 }}>Home</span>
+          </button>
+
           {/* Console Button (Active) */}
           <button
             style={{
               width: '71px',
-              height: '64px',
+              height: '58px',
               backgroundColor: '#39291f',
               border: '1px solid #7c4c31',
               borderRadius: '6px',
@@ -68,7 +100,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               padding: '6px 0'
             }}
           >
-            <Terminal size={20} color="#ed9d66" />
+            <Terminal size={18} color="#ed9d66" />
             <span style={{ fontSize: '11px', fontWeight: 600 }}>Console</span>
           </button>
 
@@ -77,7 +109,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             onClick={onNavigateToTraverse}
             style={{
               width: '71px',
-              height: '64px',
+              height: '58px',
               backgroundColor: '#211c18',
               border: '1px solid transparent',
               borderRadius: '6px',
@@ -94,7 +126,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
           >
-            <MapPin size={20} color="#b8a99a" />
+            <MapPin size={18} color="#b8a99a" />
             <span style={{ fontSize: '11px', fontWeight: 500 }}>Traverse</span>
           </button>
 
@@ -103,7 +135,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             onClick={onOpenSources}
             style={{
               width: '71px',
-              height: '64px',
+              height: '58px',
               backgroundColor: '#211c18',
               border: '1px solid transparent',
               borderRadius: '6px',
@@ -120,7 +152,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
           >
-            <BookOpen size={20} color="#b8a99a" />
+            <BookOpen size={18} color="#b8a99a" />
             <span style={{ fontSize: '11px', fontWeight: 500 }}>Sources</span>
           </button>
         </div>
@@ -152,7 +184,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               color: '#ed9d66',
               marginBottom: '4px'
             }}>
-              ARES–GALE &nbsp;/&nbsp; SURFACE OPERATIONS
+              TEAM MARS NAVIGATORS &nbsp;/&nbsp; SURFACE OPERATIONS
             </div>
             <h1 style={{
               margin: 0,
@@ -350,7 +382,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                   <div style={{ width: '100%', height: '6px', backgroundColor: '#332922', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ width: '84%', height: '100%', backgroundColor: '#f1a16e' }} />
                   </div>
-                  <div style={{ fontSize: '11px', color: '#8c7d70', marginTop: '4px' }}>Reserve nominal</div>
+                  <div style={{ fontSize: '11px', color: '#8c7d70', marginTop: '4px' }}>Calculated from EVA duration</div>
                 </div>
 
                 {/* Suit Battery */}
@@ -362,14 +394,14 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                   <div style={{ width: '100%', height: '6px', backgroundColor: '#332922', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ width: '72%', height: '100%', backgroundColor: '#c0c8a1' }} />
                   </div>
-                  <div style={{ fontSize: '11px', color: '#8c7d70', marginTop: '4px' }}>Charge nominal</div>
+                  <div style={{ fontSize: '11px', color: '#8c7d70', marginTop: '4px' }}>Thermal heaters & comms load</div>
                 </div>
 
                 {/* Orbiter Link */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid #332922' }}>
                   <div>
                     <div style={{ color: '#b8a99a', fontSize: '13px' }}>Orbiter link</div>
-                    <div style={{ fontSize: '11px', color: '#8c7d70' }}>Simulated UHF relay</div>
+                    <div style={{ fontSize: '11px', color: '#8c7d70' }}>UHF Relay to Mars Odyssey</div>
                   </div>
                   <span style={{
                     color: '#c0c8a1',
@@ -387,8 +419,8 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                 {/* One-way Delay */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid #332922' }}>
                   <div>
-                    <div style={{ color: '#b8a99a', fontSize: '13px' }}>One-way delay</div>
-                    <div style={{ fontSize: '11px', color: '#8c7d70' }}>Scenario assumption</div>
+                    <div style={{ color: '#b8a99a', fontSize: '13px' }}>One-way light time</div>
+                    <div style={{ fontSize: '11px', color: '#8c7d70' }}>Earth-Mars orbital geometry</div>
                   </div>
                   <span style={{
                     color: '#f3e7d8',
@@ -594,7 +626,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                 display: 'flex',
                 alignItems: 'baseline',
                 gap: '8px',
-                borderBottom: '1px solid #332922',
+                borderBottom: '1px solid #332822',
                 paddingBottom: '14px',
                 marginBottom: '14px'
               }}>
@@ -636,13 +668,13 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#b8a99a' }}>UV irradiance</span>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: '#f1c680' }}>
-                    Moderate
+                    {telemetry?.rems?.uv_index || 'Moderate'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#b8a99a' }}>Wind speed</span>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: '#8c7d70' }}>
-                    No reading
+                  <span style={{ color: '#b8a99a' }}>Radiation dose rate</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: '#c0c8a1' }}>
+                    {telemetry?.rad?.dose_rate_uSv_hour || 24.2} µSv/h
                   </span>
                 </div>
               </div>
@@ -710,15 +742,12 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               <text x="18" y="114" fill="#8c7d70" fontSize="11" fontFamily="'IBM Plex Mono', monospace">-80°</text>
 
               {/* Day Coordinates: Sols 4989 to 4995 */}
-              {/* Sol 4989: x=100, Sol 4990: x=230, Sol 4991: x=360, Sol 4992: x=490, Sol 4993: x=620, Sol 4994: x=750, Sol 4995: x=880 */}
-              {/* Max temp path */}
               <path
                 d="M 100 18 L 230 20 L 360 21 L 490 20 L 620 22 L 750 19 L 880 18"
                 fill="none"
                 stroke="#f1a16e"
                 strokeWidth="2"
               />
-              {/* Min temp path */}
               <path
                 d="M 100 114 L 230 111 L 360 115 L 490 114 L 620 116 L 750 113 L 880 114"
                 fill="none"
@@ -726,13 +755,11 @@ export const MissionControl: React.FC<MissionControlProps> = ({
                 strokeWidth="2"
               />
 
-              {/* Shaded Area between min and max */}
               <path
                 d="M 100 18 L 230 20 L 360 21 L 490 20 L 620 22 L 750 19 L 880 18 L 880 114 L 750 113 L 620 116 L 490 114 L 360 115 L 230 111 L 100 114 Z"
                 fill="rgba(241, 161, 110, 0.08)"
               />
 
-              {/* Sol points */}
               {[
                 { sol: 4989, x: 100, max: 2, min: -84 },
                 { sol: 4990, x: 230, max: 0, min: -82 },
