@@ -1,11 +1,11 @@
 # ARES–Gale Field Console
 
 An independent mission workspace derived from AliSakr9997/Mars_Navigators (0c1dc1c).
-The landing sequence opens crew access and the Orbit Blue field console. Use the navigation to compare scientific objectives, enter or link suit readings, run the terrain planner, or open the original traverse view.
+The landing sequence leads directly to the Orbit Blue field console when you press Start. Use the navigation to compare scientific objectives, enter or link suit readings, run the terrain planner, or open the original traverse view.
 
 ## Run the combined application
 
-Build with `docker build -t ares-field .` and start with `docker run --name ares-field --rm -p 8000:8000 -v ares-crew:/root/.ares-gale ares-field`. In a second terminal run `docker exec -it ares-field python server/mission_auth.py commander` to create a crew login. Open http://localhost:8000. Use HTTPS when hosting remotely. The volume stores crew accounts. Suit readings and history stay in the current browser.
+Build with `docker build -t ares-field .` and start with `docker run --name ares-field --rm -p 8000:8000 -v ares-crew:/root/.ares-gale ares-field`. Open http://localhost:8000. Use HTTPS when hosting remotely. The volume stores crew accounts. Suit readings and history stay in the current browser.
 
 For local development install both server/requirements.txt and planner/requirements.txt in a virtual environment. From the project root run `uvicorn --app-dir server mission_gateway:app --port 8000`. In client run `npm ci` and `npm run dev`.
 
@@ -18,4 +18,5 @@ The separate Terrain model view mounts the upstream v5 planner under /planner/. 
 
 ## Vercel
 
-Import the repository root. The Vite build and Python API are configured in vercel.json. Set DATABASE_URL to a TLS-enabled PostgreSQL connection string for persistent crew accounts and sessions. With the same environment variable locally, install requirements.txt and run `python server/mission_auth.py commander` to provision the first crew member. The serverless planner uses demo terrain when rasterio is unavailable.
+Import the repository root. The Vite build and Python API are configured in vercel.json. No crew login or database is required to open the console. The serverless planner uses demo terrain when rasterio is unavailable.
+
