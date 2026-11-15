@@ -1,0 +1,10 @@
+{
+  "installCommand": "npm ci --prefix client",
+  "buildCommand": "npm run build --prefix client",
+  "outputDirectory": "client/dist",
+  "functions": {"api/index.py":{"includeFiles":"{server/**,planner/backend/**,planner/frontend/**}","excludeFiles":"{client/**,planner/tests/**,planner/*.ipynb,datasets/**,.venv/**}"}},
+  "rewrites": [
+    {"source":"/api/:path*","destination":"/api/index"},
+    {"source":"/planner/:path*","destination":"/api/index"}
+  ]
+}

@@ -15,3 +15,7 @@ The field map uses normalized scenario coordinates on a simulated Gale terrain g
 
 The separate Terrain model view mounts the upstream v5 planner under /planner/. See planner/README.md for DEM configuration, online loading and demo terrain.
 
+
+## Vercel
+
+Import the repository root. The Vite build and Python API are configured in vercel.json. Set DATABASE_URL to a TLS-enabled PostgreSQL connection string for persistent crew accounts and sessions. With the same environment variable locally, install requirements.txt and run `python server/mission_auth.py commander` to provision the first crew member. The serverless planner uses demo terrain when rasterio is unavailable.

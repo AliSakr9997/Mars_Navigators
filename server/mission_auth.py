@@ -20,6 +20,19 @@ router = APIRouter(prefix="/api/auth")
 
 @contextmanager
 def database():
+    if os.environ.get("DATABASE_URL"):
+        import psycopg
+        class Store:
+            def execute(self, query, params=()):
+                return conn.execute(query.replace("?", "%s"), params)
+        with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+            conn.execute("CREATE TABLE IF NOT EXISTS crew (identity TEXT PRIMARY KEY, salt BYTEA NOT NULL, verifier BYTEA NOT NULL)")
+            conn.execute("CREATE TABLE IF NOT EXISTS sessions (digest BYTEA PRIMARY KEY, identity TEXT NOT NULL, expires BIGINT NOT NULL)")
+            conn.execute("CREATE TABLE IF NOT EXISTS attempts (identity TEXT PRIMARY KEY, since BIGINT NOT NULL, count INTEGER NOT NULL)")
+            yield Store()
+        return
+    if os.environ.get("VERCEL"):
+        raise HTTPException(503, "Configure the mission crew database before signing in.")
     path = Path(os.environ.get("ARES_AUTH_DB", Path.home() / ".ares-gale" / "crew.sqlite3"))
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     with closing(sqlite3.connect(path, timeout=10)) as db, db:
@@ -71,7 +84,7 @@ def session(request: Request, response: Response):
     if token:
         with database() as db:
             row = db.execute("SELECT expires FROM sessions WHERE digest=? AND expires>?",
-                             (digest(token), time.time())).fetchone()
+                             (digest(token), int(time.time()))).fetchone()
             if row:
                 return {"authenticated": True, "expires": row[0]}
     return {"authenticated": False}
@@ -87,7 +100,7 @@ def login(body: Credentials, request: Request, response: Response):
         if not db.execute("SELECT 1 FROM crew LIMIT 1").fetchone():
             raise HTTPException(503, "Crew access has not been configured yet.")
         db.execute("""INSERT INTO attempts VALUES (?, ?, 1)
-                      ON CONFLICT(identity) DO UPDATE SET count=count+1""", (identity, now))
+                      ON CONFLICT(identity) DO UPDATE SET count=attempts.count+1""", (identity, now))
         count = db.execute("SELECT count FROM attempts WHERE identity=?", (identity,)).fetchone()[0]
         row = db.execute("SELECT salt, verifier FROM crew WHERE identity=?", (identity,)).fetchone()
     if count > 10:
@@ -128,3 +141,4 @@ if __name__ == "__main__":
     except (ValueError, sqlite3.IntegrityError) as error:
         parser.exit(1, f"Could not create login: {error}\n")
     print("Crew login created.")
+
