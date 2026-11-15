@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Activity, Compass, Layers, MapPin, Mountain, Orbit, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
+import {Activity, Compass, Layers, MapPin, Orbit, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
 import App from '../App';
 import catalog from './catalog.json';
 import './workspace.css';
@@ -7,7 +7,6 @@ import './workspace.css';
 const screens = [
   {name:'Field console',icon:Compass,url:'/field/index.html'},
   {name:'Suit readings',icon:Activity,url:'/field/suit.html'},
-  {name:'Terrain model',icon:Mountain,url:'/planner/'},
   {name:'Traverse planner',icon:Layers,url:''}
 ];
 const defaults={name:'ARES-Gale',phase:'Traverse planning',group:0,target:0};
@@ -66,7 +65,6 @@ export default function FieldWorkspace(){
     return {lng:extent.west+p[0]*(extent.east-extent.west),lat:extent.north+p[1]*(extent.south-extent.north),name};
   }
   const geoStart=geographic(start,'EVA Start'),geoEnd=geographic(end,'EVA Target');
-  const terrainQuery=geoStart&&geoEnd?'?'+new URLSearchParams({slon:String(geoStart.lng),slat:String(geoStart.lat),elon:String(geoEnd.lng),elat:String(geoEnd.lat)}):'';
   function pick(which:string){show(0);send('pick',{which});if(innerWidth<760)collapse(true);}
   const distances=Object.values(metrics).filter(Boolean).map(v=>v.d);
   return <main className={'field-workspace'+(collapsed?' rail-closed':'')}>
@@ -89,7 +87,7 @@ export default function FieldWorkspace(){
     <div className="field-content">
       {collapsed&&<button className="rail-open" onClick={()=>collapse(false)}><PanelLeftOpen size={16}/> Mission options</button>}
       <iframe ref={field} title="Field console" src="/field/index.html" hidden={screen!==0} onLoad={sync}/>
-      {screen>0&&(screens[screen].url?<iframe key={screen} title={screens[screen].name} src={screens[screen].url+(screen===2?terrainQuery:"")}/>:<App missionName={mission.name} initialStart={geoStart} initialEnd={geoEnd}/>)}
+      {screen>0&&(screens[screen].url?<iframe key={screen} title={screens[screen].name} src={screens[screen].url}/>:<App missionName={mission.name} initialStart={geoStart} initialEnd={geoEnd}/>)}
     </div>
   </main>
 }
