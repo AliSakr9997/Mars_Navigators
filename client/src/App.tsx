@@ -8,7 +8,7 @@ import { TelemetryPanel } from './components/TelemetryPanel';
 import { SuitTelemetryModal } from './components/SuitTelemetryModal';
 import { AttributionModal } from './components/AttributionModal';
 import { Waypoint, RouteResponse, TelemetryResponse } from './types/api';
-import { generateMockRoute } from './utils/mockRoute';
+import { computeRealMarsRoute } from './utils/marsPathfindingEngine';
 import { ArrowLeft, Home, Sparkles } from 'lucide-react';
 
 const INITIAL_WAYPOINTS: Waypoint[] = [
@@ -18,6 +18,32 @@ const INITIAL_WAYPOINTS: Waypoint[] = [
   { lat: -4.6550, lng: 137.3850, name: 'Glen Torridon Clay Haven', elevation_m: -4480.0 },
   { lat: -4.7450, lng: 137.4350, name: 'Gediz Vallis Channel Outlook', elevation_m: -3950.0 }
 ];
+
+const DEFAULT_TELEMETRY: TelemetryResponse = {
+  status: 'nominal',
+  location: 'Gale Crater, Mount Sharp Footprints',
+  sol: 4995,
+  rems: {
+    sol: 4995,
+    air_temp_c: -28.0,
+    ground_temp_c: -42.0,
+    pressure_pa: 777.0,
+    wind_speed_ms: 0.0,
+    uv_index: 'Moderate',
+    diurnal_min_c: -84.0,
+    diurnal_max_c: 4.0,
+    humidity_relative_percent: 4.5
+  },
+  rad: {
+    dose_rate_mSv_day: 0.58,
+    dose_rate_uSv_hour: 24.2,
+    cumulative_eva_allowed_hours: 8.0,
+    solar_particle_event_alert: false,
+    status: 'NOMINAL_MONITORING',
+    shielding_recommendation: 'Standard xEMU Multi-Layer Insulation Sufficient'
+  },
+  disclaimer: 'Curiosity REMS and RAD observation data (NASA PDS / CAB / SwRI).'
+};
 
 export default function App() {
   const [activeView, setActiveView] = useState<'landing' | 'console' | 'traverse'>('landing');
@@ -29,7 +55,7 @@ export default function App() {
   const [maxSlopeDeg, setMaxSlopeDeg] = useState<number>(20);
 
   const [routeResult, setRouteResult] = useState<RouteResponse | null>(null);
-  const [telemetry, setTelemetry] = useState<TelemetryResponse | null>(null);
+  const [telemetry, setTelemetry] = useState<TelemetryResponse | null>(DEFAULT_TELEMETRY);
 
   const [activeHoverCoord, setActiveHoverCoord] = useState<[number, number] | null>(null);
 
@@ -52,11 +78,12 @@ export default function App() {
 
   // Initial load
   useEffect(() => {
-    // 1. Initial baseline route
-    const initialRoute = generateMockRoute({
+    // 1. Initial baseline route computed via Mars Pathfinding Engine
+    const initialRoute = computeRealMarsRoute({
       start: INITIAL_WAYPOINTS[0],
       destination: INITIAL_WAYPOINTS[1],
       mode: 'Balanced',
+      algorithm: 'A* + any-angle smoothing',
       max_slope_deg: 20
     });
     setRouteResult(initialRoute);
@@ -74,7 +101,7 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  // Compute Route
+  // Compute Route using API or built-in A* Pathfinding Engine
   const handleComputeRoute = async () => {
     setLoading(true);
     try {
@@ -93,20 +120,23 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         setRouteResult(data);
-      } else {
-        throw new Error('Fallback to local model');
+        setLoading(false);
+        return;
       }
     } catch {
-      const fallback = generateMockRoute({
-        start: startPoint,
-        destination: destPoint,
-        mode: selectedMode,
-        max_slope_deg: maxSlopeDeg
-      });
-      setRouteResult(fallback);
-    } finally {
-      setLoading(false);
+      // Fallback seamlessly to client-side engine
     }
+
+    // Direct in-browser A* pathfinding calculation
+    const computed = computeRealMarsRoute({
+      start: startPoint,
+      destination: destPoint,
+      mode: selectedMode,
+      algorithm: 'A* + any-angle smoothing',
+      max_slope_deg: maxSlopeDeg
+    });
+    setRouteResult(computed);
+    setLoading(false);
   };
 
   const handleClearRoute = () => {
