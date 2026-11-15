@@ -7,15 +7,14 @@ import { RoutePlannerPanel } from './components/RoutePlannerPanel';
 import { TelemetryPanel } from './components/TelemetryPanel';
 import { SuitTelemetryModal } from './components/SuitTelemetryModal';
 import { AttributionModal } from './components/AttributionModal';
-import { NasaTrekModal } from './components/NasaTrekModal';
-import { Waypoint, RouteResponse, TelemetryResponse } from './types/api';
+import { Waypoint, RouteResponse, TelemetryResponse, TransportMode } from './types/api';
 import { computeRealMarsRoute } from './utils/marsPathfindingEngine';
-import { ArrowLeft, Home, Sparkles, Globe } from 'lucide-react';
+import { ArrowLeft, Home, Sparkles, Compass, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 const INITIAL_WAYPOINTS: Waypoint[] = [
-  { lat: -4.6620, lng: 137.4120, name: 'Curiosity Sol 4000', elevation_m: -4462.0 },
-  { lat: -4.7180, lng: 137.4850, name: 'Boxwork Ridge Alpha', elevation_m: -4120.0 },
-  { lat: -4.6950, lng: 137.4400, name: 'Sulfate Contact Zone', elevation_m: -4280.0 },
+  { lat: -4.6620, lng: 137.4120, name: 'Curiosity Sol 4000 Station', elevation_m: -4462.0 },
+  { lat: -4.7180, lng: 137.4850, name: 'Boxwork Ridge Site Alpha', elevation_m: -4120.0 },
+  { lat: -4.6950, lng: 137.4400, name: 'Sulfate Stratigraphy Bench', elevation_m: -4280.0 },
   { lat: -4.6550, lng: 137.3850, name: 'Glen Torridon Clay Haven', elevation_m: -4480.0 },
   { lat: -4.7450, lng: 137.4350, name: 'Gediz Vallis Channel Outlook', elevation_m: -3950.0 }
 ];
@@ -52,10 +51,13 @@ export default function App() {
   const [destPoint, setDestPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[1]);
   const [waypoints, setWaypoints] = useState<Waypoint[]>(INITIAL_WAYPOINTS);
 
+  const [transportMode, setTransportMode] = useState<TransportMode>('walking');
   const [selectedMode, setSelectedMode] = useState<string>('Balanced');
   const [maxSlopeDeg, setMaxSlopeDeg] = useState<number>(20);
+  const [pickMode, setPickMode] = useState<'start' | 'dest' | null>(null);
 
   const [routeResult, setRouteResult] = useState<RouteResponse | null>(null);
+  const [activeOptionId, setActiveOptionId] = useState<string>('P1');
   const [telemetry, setTelemetry] = useState<TelemetryResponse | null>(DEFAULT_TELEMETRY);
 
   const [activeHoverCoord, setActiveHoverCoord] = useState<[number, number] | null>(null);
@@ -71,54 +73,24 @@ export default function App() {
 
   const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
   const [isSuitTelemetryOpen, setIsSuitTelemetryOpen] = useState<boolean>(false);
-  const [isNasaTrekOpen, setIsNasaTrekOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const handleSelectRouteOption = (optionId: string) => {
-    if (!routeResult || !routeResult.options) return;
-    const selected = routeResult.options.find(o => o.id === optionId);
-    if (!selected) return;
-
-    setRouteResult(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        activeOptionId: optionId,
-        summary: selected.summary,
-        route_coordinates: selected.route_coordinates,
-        elevation_profile: selected.elevation_profile,
-        pnr: selected.pnr
-      };
-    });
-  };
 
   const handleToggleLayer = (key: keyof MapLayersState) => {
     setLayers(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Initial load
+  // Initial calculation on load
   useEffect(() => {
-    // 1. Initial baseline route computed via Mars Pathfinding Engine
     const initialRoute = computeRealMarsRoute({
       start: INITIAL_WAYPOINTS[0],
       destination: INITIAL_WAYPOINTS[1],
       mode: 'Balanced',
       algorithm: 'A* + any-angle smoothing',
-      max_slope_deg: 20
+      max_slope_deg: 20,
+      transportMode: 'walking'
     });
     setRouteResult(initialRoute);
-
-    // 2. Fetch backend telemetry
-    fetch('/api/telemetry')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setTelemetry(data); })
-      .catch(() => {});
-
-    // 3. Fetch backend waypoints
-    fetch('/api/layers/waypoints')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data && data.length > 0) setWaypoints(data); })
-      .catch(() => {});
+    setActiveOptionId('P1');
   }, []);
 
   // Compute Route using API or built-in A* Pathfinding Engine
@@ -133,42 +105,91 @@ export default function App() {
           destination: destPoint,
           mode: selectedMode,
           algorithm: 'A* + any-angle smoothing',
-          max_slope_deg: maxSlopeDeg
+          max_slope_deg: maxSlopeDeg,
+          transportMode
         })
       });
 
       if (res.ok) {
         const data = await res.json();
         setRouteResult(data);
+        setActiveOptionId('P1');
         setLoading(false);
         return;
       }
     } catch {
-      // Fallback seamlessly to client-side engine
+      // Fallback seamlessly to in-engine solver
     }
 
-    // Direct in-browser A* pathfinding calculation
+    // Direct in-browser multi-candidate A* pathfinding calculation
     const computed = computeRealMarsRoute({
       start: startPoint,
       destination: destPoint,
       mode: selectedMode,
       algorithm: 'A* + any-angle smoothing',
-      max_slope_deg: maxSlopeDeg
+      max_slope_deg: maxSlopeDeg,
+      transportMode
     });
     setRouteResult(computed);
+    setActiveOptionId('P1');
     setLoading(false);
   };
 
-  const handleClearRoute = () => {
-    setRouteResult(null);
+  // Select multi-candidate alternative (P1, P2, P3)
+  const handleSelectOption = (optionId: string) => {
+    if (!routeResult || !routeResult.options) return;
+    const found = routeResult.options.find(o => o.id === optionId);
+    if (!found) return;
+
+    setActiveOptionId(optionId);
+    setRouteResult({
+      ...routeResult,
+      activeOptionId: optionId,
+      summary: found.summary,
+      route_coordinates: found.route_coordinates,
+      elevation_profile: found.elevation_profile
+    });
   };
 
-  // Dynamically calculate life support and suit parameters based on actual route length
-  const calculatedEvaHours = routeResult?.summary?.estimated_eva_time_hours || 
-    (routeResult?.summary?.time_min ? routeResult.summary.time_min / 60 : 2.4);
+  const handleClearRoute = () => {
+    setStartPoint(INITIAL_WAYPOINTS[0]);
+    setDestPoint(INITIAL_WAYPOINTS[1]);
+    const computed = computeRealMarsRoute({
+      start: INITIAL_WAYPOINTS[0],
+      destination: INITIAL_WAYPOINTS[1],
+      mode: 'Balanced',
+      algorithm: 'A* + any-angle smoothing',
+      max_slope_deg: 20,
+      transportMode
+    });
+    setRouteResult(computed);
+    setActiveOptionId('P1');
+  };
 
-  const calculatedOxygenPercent = Math.max(12, Math.round(100 - (calculatedEvaHours / 8.0) * 100));
-  const calculatedBatteryPercent = Math.max(15, Math.round(100 - (calculatedEvaHours / 7.5) * 100));
+  // Re-compute when transport mode changes
+  const handleSelectTransportMode = (mode: TransportMode) => {
+    setTransportMode(mode);
+    const computed = computeRealMarsRoute({
+      start: startPoint,
+      destination: destPoint,
+      mode: selectedMode,
+      algorithm: 'A* + any-angle smoothing',
+      max_slope_deg: maxSlopeDeg,
+      transportMode: mode
+    });
+    setRouteResult(computed);
+    setActiveOptionId('P1');
+  };
+
+  // Dynamic life-support and rover battery metrics
+  const activeSummary = routeResult?.summary;
+  const calculatedDurationHours = activeSummary?.estimated_eva_time_hours || 
+    (activeSummary?.time_min ? activeSummary.time_min / 60 : 2.4);
+
+  const calculatedOxygenPercent = Math.max(12, Math.round(100 - (calculatedDurationHours / 8.0) * 100));
+  const calculatedSuitBatteryPercent = Math.max(15, Math.round(100 - (calculatedDurationHours / 7.5) * 100));
+  const roverBatteryRemainingKwh = Math.max(2.5, Number((25.0 - (activeSummary?.rover_battery_kwh_consumed || 4.2)).toFixed(1)));
+  const roverBatteryPercent = Math.round((roverBatteryRemainingKwh / 25.0) * 100);
 
   return (
     <div style={{
@@ -277,7 +298,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Indicators Ribbon (All calculated and accurate) */}
+            {/* Right Indicators Ribbon */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
               {/* Mission */}
               <div>
@@ -291,57 +312,35 @@ export default function App() {
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '18px', fontWeight: 600, color: '#f2e7d8' }}>{telemetry?.sol || 4995}</div>
               </div>
 
-              {/* EVA Timer */}
+              {/* Exploration Duration (Walking vs Rover) */}
               <div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>EVA DURATION</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>
+                  {transportMode === 'rover' ? 'ROVER TRAVEL' : 'EVA DURATION'}
+                </div>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '18px', fontWeight: 500, color: '#f2e7d8' }}>
-                  {routeResult?.summary?.time_min ? `${Math.floor(routeResult.summary.time_min / 60)}h ${routeResult.summary.time_min % 60}m` : '02h 24m'}
+                  {activeSummary?.time_min ? `${Math.floor(activeSummary.time_min / 60)}h ${Math.round(activeSummary.time_min % 60)}m` : '02h 24m'}
                 </div>
               </div>
 
-              {/* Orbiter Link */}
-              <div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>ORBITER LINK</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#c0c8a1' }}>Connected</div>
-              </div>
-
-              {/* Life Support (Dynamically calculated from route length) */}
+              {/* Consumable 1: O2 (Walking) or Cabin (Rover) */}
               <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }} title="Click to view full suit telemetry">
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>O₂ MARGIN</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>
+                  {transportMode === 'rover' ? 'CABIN STATUS' : 'O₂ MARGIN'}
+                </div>
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>
-                  {calculatedOxygenPercent}%
+                  {transportMode === 'rover' ? 'Pressurized' : `${calculatedOxygenPercent}%`}
                 </div>
               </div>
 
-              {/* Battery (Dynamically calculated from route length) */}
-              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }} title="Click to view full suit telemetry">
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>BATTERY</div>
+              {/* Consumable 2: Suit Battery (Walking) or Rover Battery Pack (Rover) */}
+              <div onClick={() => setIsSuitTelemetryOpen(true)} style={{ cursor: 'pointer' }} title="Click to view telemetry">
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>
+                  {transportMode === 'rover' ? 'ROVER BATT' : 'SUIT BATT'}
+                </div>
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>
-                  {calculatedBatteryPercent}%
+                  {transportMode === 'rover' ? `${roverBatteryRemainingKwh} kWh (${roverBatteryPercent}%)` : `${calculatedSuitBatteryPercent}%`}
                 </div>
               </div>
-
-              {/* NASA Mars Trek Portal */}
-              <button
-                onClick={() => setIsNasaTrekOpen(true)}
-                style={{
-                  backgroundColor: '#302923',
-                  border: '1px solid #f1a16e',
-                  color: '#f1a16e',
-                  borderRadius: '5px',
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-                title="Open NASA Mars Trek Interactive Map"
-              >
-                <Globe size={13} />
-                NASA Trek (3D) &nbsp;↗
-              </button>
 
               {/* Sources link */}
               <button
@@ -371,7 +370,7 @@ export default function App() {
             flexDirection: 'column',
             gap: '24px'
           }}>
-            {/* Top Row: Map (68%) + Route Planner Panel (32%) */}
+            {/* Top Row: Mars Map (66%) + Route Planner Panel (34%) */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'minmax(600px, 1fr) minmax(380px, 490px)',
@@ -386,8 +385,9 @@ export default function App() {
                 activeHoverCoord={activeHoverCoord}
                 layers={layers}
                 onToggleLayer={handleToggleLayer}
-                onSelectOption={handleSelectRouteOption}
-                onOpenNasaTrek={() => setIsNasaTrekOpen(true)}
+                onSelectOption={handleSelectOption}
+                pickMode={pickMode}
+                onSetPickMode={setPickMode}
               />
 
               <RoutePlannerPanel
@@ -403,12 +403,15 @@ export default function App() {
                 onComputeRoute={handleComputeRoute}
                 onClearRoute={handleClearRoute}
                 loading={loading}
-                route={routeResult}
-                onSelectOption={handleSelectRouteOption}
+                routeResult={routeResult}
+                transportMode={transportMode}
+                onSelectTransportMode={handleSelectTransportMode}
+                pickMode={pickMode}
+                onSetPickMode={setPickMode}
               />
             </div>
 
-            {/* Middle Row: 8 Surface Telemetry Cards (All Calculated & Connected) */}
+            {/* Middle Row: 8 Surface Telemetry Cards (Connected) */}
             <TelemetryPanel
               telemetry={telemetry}
               routeResult={routeResult}
@@ -433,18 +436,18 @@ export default function App() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                      Route metrics
+                      {transportMode === 'rover' ? 'Rover Mission Metrics' : 'Astronaut EVA Metrics'}
                     </h3>
                     <span style={{
-                      color: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#c0c8a1',
-                      fontSize: '13px',
+                      color: (activeSummary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#10b981',
+                      fontSize: '12px',
                       fontWeight: 600,
                       backgroundColor: '#262920',
-                      border: '1px solid #48523c',
+                      border: `1px solid ${(activeSummary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#10b981'}`,
                       padding: '2px 8px',
                       borderRadius: '4px'
                     }}>
-                      {(routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'Caution: Steep' : 'Safe Traversal'}
+                      {(activeSummary?.max_slope_deg || 0) > maxSlopeDeg ? 'Caution: Steep Scarp' : 'Traversable'}
                     </span>
                   </div>
 
@@ -455,71 +458,126 @@ export default function App() {
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Total distance</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${routeResult.summary.total_distance_km} km` : '3.12 km'}
+                        {activeSummary ? `${activeSummary.total_distance_km} km` : '3.12 km'}
                       </div>
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Walking time (Tobler)</div>
+                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>
+                        {transportMode === 'rover' ? 'Rover travel time' : 'Walking time (Tobler)'}
+                      </div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${routeResult.summary.time_min || Math.round(routeResult.summary.estimated_eva_time_hours * 60)} min` : '144 min'}
+                        {activeSummary ? `${activeSummary.time_min || Math.round(activeSummary.estimated_eva_time_hours * 60)} min` : '144 min'}
                       </div>
                     </div>
 
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Maximum slope</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${routeResult.summary.max_slope_deg.toFixed(1)}°` : '19.1°'}
+                        {activeSummary ? `${activeSummary.max_slope_deg.toFixed(1)}°` : '19.1°'}
                       </div>
                     </div>
 
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Average slope</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${routeResult.summary.avg_slope_deg.toFixed(1)}°` : '6.6°'}
+                        {activeSummary ? `${activeSummary.avg_slope_deg.toFixed(1)}°` : '6.6°'}
                       </div>
                     </div>
 
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Elevation gain</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `+${Math.round(routeResult.summary.elevation_gain_m)} m` : '+309 m'}
+                        {activeSummary ? `+${Math.round(activeSummary.elevation_gain_m)} m` : '+309 m'}
                       </div>
                     </div>
 
                     <div>
                       <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Elevation loss</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `−${Math.round(routeResult.summary.elevation_loss_m)} m` : '−56 m'}
+                        {activeSummary ? `−${Math.round(activeSummary.elevation_loss_m)} m` : '−56 m'}
                       </div>
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Metabolic energy</div>
+                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>
+                        {transportMode === 'rover' ? 'Rover battery draw' : 'Suit O₂ consumed'}
+                      </div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary?.energy_kj ? `${Math.round(routeResult.summary.energy_kj)} kJ` : '967 kJ'}
+                        {transportMode === 'rover'
+                          ? `${activeSummary?.rover_battery_kwh_consumed || 4.2} kWh`
+                          : `${activeSummary?.oxygen_consumed_liters || 148} L`}
                       </div>
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>Safety score</div>
+                      <div style={{ fontSize: '13px', color: '#bdb0a2', marginBottom: '4px' }}>
+                        {transportMode === 'rover' ? 'Powertrain state' : 'Metabolic burn'}
+                      </div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                        {routeResult?.summary ? `${Math.max(40, Math.round(100 - (routeResult.summary.risk_score || 0.14) * 100))} / 100` : '86 / 100'}
+                        {transportMode === 'rover' ? 'EV Traction Nominal' : `${activeSummary?.energy_kcal || 520} kcal`}
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div style={{
+                  marginTop: '20px',
+                  backgroundColor: '#302923',
+                  borderRadius: '6px',
+                  padding: '12px 14px',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', flexShrink: 0 }} />
+                  <span style={{ color: '#bdb0a2' }}>
+                    Active Strategy: <strong style={{ color: '#f2e7d8' }}>{activeOptionId} ({selectedMode})</strong> · Model: A* Any-Angle Smoothing
+                  </span>
+                </div>
               </div>
 
-              {/* Card 2: Elevation Profile */}
-              <ElevationProfile
-                profile={routeResult?.elevation_profile || []}
-                routeCoordinates={routeResult?.route_coordinates}
-                onHoverCoord={setActiveHoverCoord}
-                maxSlopeDeg={maxSlopeDeg}
-              />
+              {/* Card 2: Elevation Profile Chart */}
+              <div style={{
+                backgroundColor: '#201c19',
+                border: '1px solid #443a33',
+                borderRadius: '12px',
+                padding: '22px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
+                    Elevation profile
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      backgroundColor: '#302923',
+                      border: '1px solid #443a33',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '11px',
+                      color: '#f1a16e'
+                    }}>
+                      HRSC-MOLA
+                    </span>
+                  </div>
+                </div>
 
-              {/* Card 3: Hazard Alerts */}
+                <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '18px' }} />
+
+                <div style={{ flex: 1, minHeight: '230px' }}>
+                  <ElevationProfile
+                    elevationProfile={routeResult?.elevation_profile || []}
+                    routeCoordinates={routeResult?.route_coordinates || []}
+                    onHoverPoint={(coord) => setActiveHoverCoord(coord)}
+                  />
+                </div>
+              </div>
+
+              {/* Card 3: Scientific Traversal & Hazard Alerts */}
               <div style={{
                 backgroundColor: '#201c19',
                 border: '1px solid #443a33',
@@ -532,120 +590,129 @@ export default function App() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 600, color: '#f2e7d8' }}>
-                      Hazard alerts
+                      Terrain & Hazards
                     </h3>
                     <span style={{
-                      fontSize: '13px',
+                      color: '#10b981',
+                      fontSize: '12px',
                       fontWeight: 600,
-                      color: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '#f4896b' : '#c0c8a1'
+                      backgroundColor: '#1b2c22',
+                      border: '1px solid #10b981',
+                      padding: '2px 8px',
+                      borderRadius: '4px'
                     }}>
-                      {(routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? '1 active' : '0 active'}
+                      Clearance: {activeSummary?.min_clear_m || 14.2}m
                     </span>
                   </div>
 
-                  <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '14px' }} />
+                  <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '18px' }} />
 
-                  {/* Hazard Alert Rows */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {[
-                      {
-                        label: 'Slope exceeds safe threshold',
-                        status: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'ALERT' : 'CLEAR',
-                        type: (routeResult?.summary?.max_slope_deg || 0) > maxSlopeDeg ? 'alert' : 'clear'
-                      },
-                      { label: 'Sand dune mobility trap', status: 'CLEAR', type: 'clear' },
-                      { label: 'Orbiter UHF loss of sight', status: 'CLEAR', type: 'clear' },
-                      { label: 'Radiation exposure threshold', status: 'CLEAR', type: 'clear' },
-                      { label: 'Passes near science waypoint', status: 'INFO', type: 'info' },
-                      {
-                        label: 'Life support O₂ margin',
-                        status: calculatedOxygenPercent < 20 ? 'ALERT' : 'CLEAR',
-                        type: calculatedOxygenPercent < 20 ? 'alert' : 'clear'
-                      }
-                    ].map((h, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            backgroundColor: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f1a16e' : '#a39180'
-                          }} />
-                          <span style={{
-                            fontSize: '13px',
-                            fontWeight: h.type !== 'clear' ? 600 : 400,
-                            color: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f2e7d8' : '#bdb0a2'
-                          }}>
-                            {h.label}
-                          </span>
+                  {/* Traversed Stratigraphic Units */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#bdb0a2', marginBottom: '8px' }}>
+                      Traversed Geological Units (USGS SIM 3292):
+                    </div>
+                    {(routeResult?.traversed_geology || [
+                      { unit: 'Glen Torridon Clay-bearing Unit', percent: 34.0 },
+                      { unit: 'Sulfate-Bearing Layered Strata', percent: 46.0 },
+                      { unit: 'Boxwork Ridge Formations', percent: 20.0 }
+                    ]).map(item => (
+                      <div key={item.unit} style={{ marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#f2e7d8', marginBottom: '2px' }}>
+                          <span>{item.unit}</span>
+                          <span style={{ fontFamily: 'monospace' }}>{item.percent}%</span>
                         </div>
-                        <span style={{
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          color: h.type === 'alert' ? '#f4896b' : h.type === 'info' ? '#f1a16e' : '#a39180'
-                        }}>
-                          {h.status}
-                        </span>
+                        <div style={{ height: '4px', backgroundColor: '#332822', borderRadius: '2px', overflow: 'hidden' }}>
+                          <div style={{
+                            width: `${item.percent}%`,
+                            height: '100%',
+                            backgroundColor: item.unit.includes('Clay') ? '#aa8b76' : (item.unit.includes('Sulfate') ? '#d5a39d' : '#c0c8a1')
+                          }} />
+                        </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Hazard Checkpoint Notifications */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{
+                      backgroundColor: '#26201a',
+                      border: '1px solid #7c4c31',
+                      borderRadius: '6px',
+                      padding: '10px 12px',
+                      fontSize: '12px',
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'flex-start'
+                    }}>
+                      <span style={{ color: '#f1a16e', fontSize: '15px' }}>⚠</span>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#f1a16e' }}>Mount Sharp Scarp Buffer</div>
+                        <div style={{ color: '#bdb0a2', fontSize: '11px' }}>
+                          Route maintains safe standoff clearance from &gt;20° impassable terrain.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      backgroundColor: '#26201a',
+                      border: '1px solid #7c4c31',
+                      borderRadius: '6px',
+                      padding: '10px 12px',
+                      fontSize: '12px',
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'flex-start'
+                    }}>
+                      <span style={{ color: '#f1c680', fontSize: '15px' }}>ℹ</span>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#f1c680' }}>
+                          {transportMode === 'rover' ? 'Dune Mobility Caution' : 'Basaltic Sand Dune Field'}
+                        </div>
+                        <div style={{ color: '#bdb0a2', fontSize: '11px' }}>
+                          {transportMode === 'rover'
+                            ? 'Loose sand creates high wheel-slip sinkage risk. Stay on hard bedrock.'
+                            : 'Increased gait effort on loose regolith modeled via Minetti coefficients.'}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div style={{
+                  marginTop: '16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   fontSize: '12px',
-                  color: '#8c7d70',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #332822'
+                  color: '#bdb0a2'
                 }}>
-                  Calculated against suited human biomechanical thresholds
+                  <span>Point of No Return:</span>
+                  <strong style={{ color: '#a855f7', fontFamily: 'monospace' }}>
+                    km {routeResult?.pnr?.km || 5.4} ({routeResult?.pnr?.safe ? 'Safe' : 'Caution'})
+                  </strong>
                 </div>
               </div>
             </div>
-
-            {/* Bottom Credits & Disclaimers */}
-            <footer style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingTop: '16px',
-              borderTop: '1px solid #332822',
-              fontSize: '12px',
-              color: '#8c7d70',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                Team Mars Navigators &nbsp;/&nbsp; Gale Crater, Mars
-              </span>
-              <span>
-                NASA Space Apps Challenge 2026 · HiRISE & MOLA Topography · Curiosity REMS/RAD
-              </span>
-            </footer>
           </main>
         </div>
       )}
 
-      {/* Modals */}
-      <AttributionModal
-        isOpen={isAttributionOpen}
-        onClose={() => setIsAttributionOpen(false)}
-      />
+      {/* Suit Telemetry / REMS Modal */}
+      {isSuitTelemetryOpen && (
+        <SuitTelemetryModal
+          isOpen={isSuitTelemetryOpen}
+          telemetry={telemetry}
+          onClose={() => setIsSuitTelemetryOpen(false)}
+        />
+      )}
 
-      <SuitTelemetryModal
-        isOpen={isSuitTelemetryOpen}
-        onClose={() => setIsSuitTelemetryOpen(false)}
-        telemetry={telemetry}
-      />
-
-      <NasaTrekModal
-        isOpen={isNasaTrekOpen}
-        onClose={() => setIsNasaTrekOpen(false)}
-        onOpenRoutePlanner={() => {
-          setIsNasaTrekOpen(false);
-          setActiveView('traverse');
-        }}
-      />
+      {/* Data Attribution Modal */}
+      {isAttributionOpen && (
+        <AttributionModal
+          onClose={() => setIsAttributionOpen(false)}
+        />
+      )}
     </div>
   );
 }

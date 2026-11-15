@@ -1,6 +1,6 @@
 import React from 'react';
-import { Waypoint, RouteResponse, RouteOption } from '../types/api';
-import { Crosshair, ChevronDown, Plus, Minus, Zap, Shield, Compass, Sparkles, AlertTriangle } from 'lucide-react';
+import { Waypoint, RouteResponse, TransportMode } from '../types/api';
+import { Crosshair, ChevronDown, Plus, Minus, Zap, Shield, Compass, RotateCcw, AlertTriangle, Battery, Wind } from 'lucide-react';
 
 interface RoutePlannerPanelProps {
   start: Waypoint;
@@ -15,8 +15,11 @@ interface RoutePlannerPanelProps {
   onComputeRoute: () => void;
   onClearRoute: () => void;
   loading: boolean;
-  route?: RouteResponse | null;
-  onSelectOption?: (optionId: string) => void;
+  routeResult: RouteResponse | null;
+  transportMode: TransportMode;
+  onSelectTransportMode: (mode: TransportMode) => void;
+  pickMode: 'start' | 'dest' | null;
+  onSetPickMode: (mode: 'start' | 'dest' | null) => void;
 }
 
 export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
@@ -32,17 +35,17 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
   onComputeRoute,
   onClearRoute,
   loading,
-  route,
-  onSelectOption
+  routeResult,
+  transportMode,
+  onSelectTransportMode,
+  pickMode,
+  onSetPickMode
 }) => {
   const modes = [
-    { id: 'Balanced', label: 'P1: Balanced EVA (Best)', risk: '12%', color: '#00e676' },
-    { id: 'Flattest', label: 'P2: Flattest / Low Climb', risk: '8%', color: '#f59e0b' },
-    { id: 'Safest (max clearance)', label: 'P3: Max Hazard Clearance', risk: '18%', color: '#06b6d4' }
+    { id: 'Balanced', label: 'Balanced (P1)', risk: '14%', color: '#10b981', desc: 'Optimal terrain & slope' },
+    { id: 'Min slope', label: 'Flattest (P2)', risk: '18%', color: '#f59e0b', desc: 'Avoids steep ridges' },
+    { id: 'Safest (max clearance)', label: 'Max Clearance (P3)', risk: '10%', color: '#06b6d4', desc: 'Maximum hazard buffer' }
   ];
-
-  const activeOptionId = route?.activeOptionId || 'P1';
-  const activeOpt = route?.options?.find(o => o.id === activeOptionId) || route?.options?.[0];
 
   return (
     <div style={{
@@ -57,28 +60,34 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
     }}>
       <div>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{
-            margin: 0,
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: '26px',
-            fontWeight: 600,
-            color: '#f2e7d8'
-          }}>
-            Route planner
-          </h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <div>
+            <h2 style={{
+              margin: 0,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: '26px',
+              fontWeight: 700,
+              color: '#f2e7d8'
+            }}>
+              Route planner
+            </h2>
+            <div style={{ fontSize: '12px', color: '#bdb0a2' }}>
+              Multi-Model A* Surface Router
+            </div>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00e676' }} />
-            <span style={{ fontSize: '13px', color: '#00e676', fontWeight: 600 }}>
-              ARES v5 Engine
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+            <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
+              Live GIS
             </span>
           </div>
         </div>
 
-        <div style={{ height: '1px', backgroundColor: '#332922', marginBottom: '16px' }} />
+        <div style={{ height: '1px', backgroundColor: '#332922', marginBottom: '14px' }} />
 
-        {/* Start Point Picker */}
-        <div style={{ marginBottom: '14px' }}>
+        {/* Phase 5: Transportation Mode Selector Pill */}
+        <div style={{ marginBottom: '16px' }}>
           <label style={{
             display: 'block',
             fontFamily: "'IBM Plex Mono', monospace",
@@ -87,101 +96,224 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             letterSpacing: '1px',
             marginBottom: '6px'
           }}>
-            START WAYPOINT
+            EXPLORATION MODE
           </label>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            backgroundColor: '#181412',
+            border: '1px solid #443a33',
+            borderRadius: '6px',
+            padding: '3px',
+            gap: '4px'
+          }}>
+            <button
+              onClick={() => onSelectTransportMode('walking')}
+              style={{
+                backgroundColor: transportMode === 'walking' ? '#f1a16e' : 'transparent',
+                color: transportMode === 'walking' ? '#151210' : '#bdb0a2',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '7px 10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.15s'
+              }}
+            >
+              <span>🚶</span>
+              <span>Astronaut Walking</span>
+            </button>
+
+            <button
+              onClick={() => onSelectTransportMode('rover')}
+              style={{
+                backgroundColor: transportMode === 'rover' ? '#f1a16e' : 'transparent',
+                color: transportMode === 'rover' ? '#151210' : '#bdb0a2',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '7px 10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.15s'
+              }}
+            >
+              <span>🚙</span>
+              <span>Pressurized Rover</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Phase 3: Start Point Picker with Map-Click Button */}
+        <div style={{ marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <label style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '11px',
+              color: '#bdb0a2',
+              letterSpacing: '1px'
+            }}>
+              START COORDINATE
+            </label>
+            <button
+              onClick={() => onSetPickMode(pickMode === 'start' ? null : 'start')}
+              style={{
+                backgroundColor: pickMode === 'start' ? '#f1a16e' : '#302923',
+                color: pickMode === 'start' ? '#151210' : '#f1a16e',
+                border: '1px solid #7c4c31',
+                borderRadius: '4px',
+                padding: '2px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Crosshair size={12} />
+              <span>{pickMode === 'start' ? 'Click Map...' : 'Pick on Map'}</span>
+            </button>
+          </div>
+
           <div style={{
             position: 'relative',
             backgroundColor: '#302923',
-            border: '1px solid #443a33',
+            border: pickMode === 'start' ? '1px solid #f1a16e' : '1px solid #443a33',
             borderRadius: '6px',
-            padding: '10px 14px',
+            padding: '8px 12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f1a16e', flexShrink: 0 }} />
-              <select
-                value={start.name}
-                onChange={(e) => {
-                  const found = waypoints.find(w => w.name === e.target.value);
-                  if (found) onSelectStart(found);
-                }}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#f2e7d8',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {waypoints.map(w => (
-                  <option key={w.name} value={w.name} style={{ backgroundColor: '#211c18', color: '#f2e7d8' }}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#f2e7d8', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  {start.name || `Lat: ${start.lat.toFixed(4)}°, Lng: ${start.lng.toFixed(4)}°`}
+                </div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>
+                  {start.lat.toFixed(4)}°, {start.lng.toFixed(4)}° · Elev: {start.elevation_m || -4462}m
+                </div>
+              </div>
             </div>
-            <span style={{ color: '#f1a16e', fontSize: '16px', marginLeft: '6px' }}>⌖</span>
           </div>
         </div>
 
-        {/* Target Point Picker */}
+        {/* Phase 3: Destination Point Picker with Map-Click Button */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{
-            display: 'block',
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '11px',
-            color: '#bdb0a2',
-            letterSpacing: '1px',
-            marginBottom: '6px'
-          }}>
-            TARGET WAYPOINT
-          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <label style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '11px',
+              color: '#bdb0a2',
+              letterSpacing: '1px'
+            }}>
+              TARGET COORDINATE
+            </label>
+            <button
+              onClick={() => onSetPickMode(pickMode === 'dest' ? null : 'dest')}
+              style={{
+                backgroundColor: pickMode === 'dest' ? '#f1c680' : '#302923',
+                color: pickMode === 'dest' ? '#151210' : '#f1c680',
+                border: '1px solid #7c4c31',
+                borderRadius: '4px',
+                padding: '2px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Crosshair size={12} />
+              <span>{pickMode === 'dest' ? 'Click Map...' : 'Pick on Map'}</span>
+            </button>
+          </div>
+
           <div style={{
             position: 'relative',
             backgroundColor: '#302923',
-            border: '1px solid #443a33',
+            border: pickMode === 'dest' ? '1px solid #f1c680' : '1px solid #443a33',
             borderRadius: '6px',
-            padding: '10px 14px',
+            padding: '8px 12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f1c680', flexShrink: 0 }} />
-              <select
-                value={destination.name}
-                onChange={(e) => {
-                  const found = waypoints.find(w => w.name === e.target.value);
-                  if (found) onSelectDestination(found);
-                }}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#f2e7d8',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {waypoints.map(w => (
-                  <option key={w.name} value={w.name} style={{ backgroundColor: '#211c18', color: '#f2e7d8' }}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#f2e7d8', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  {destination.name || `Lat: ${destination.lat.toFixed(4)}°, Lng: ${destination.lng.toFixed(4)}°`}
+                </div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>
+                  {destination.lat.toFixed(4)}°, {destination.lng.toFixed(4)}° · Elev: {destination.elevation_m || -4120}m
+                </div>
+              </div>
             </div>
-            <span style={{ color: '#f1a16e', fontSize: '16px', marginLeft: '6px' }}>⌖</span>
           </div>
         </div>
 
-        {/* Preset Waypoints Quick Select */}
+        {/* Preset Waypoint Shortcuts */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '11px',
+              color: '#bdb0a2',
+              letterSpacing: '1px'
+            }}>
+              GALE SCIENCE STATIONS
+            </label>
+            <span style={{ fontSize: '10px', color: '#887b70' }}>Click to target</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {waypoints.slice(0, 3).map(wp => {
+              const isSelected = destination.name === wp.name;
+              return (
+                <button
+                  key={wp.name}
+                  onClick={() => onSelectDestination(wp)}
+                  style={{
+                    backgroundColor: isSelected ? '#332920' : '#251f1c',
+                    border: isSelected ? '1px solid #f1c680' : '1px solid #332922',
+                    borderRadius: '4px',
+                    padding: '5px 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isSelected ? '#f1c680' : '#887b70' }} />
+                    <span style={{ fontSize: '12px', color: isSelected ? '#f2e7d8' : '#bdb0a2' }}>
+                      {wp.name}
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#887b70' }}>
+                    {wp.elevation_m}m
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Routing Profile Strategy Pills */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{
             display: 'block',
@@ -191,303 +323,130 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             letterSpacing: '1px',
             marginBottom: '6px'
           }}>
-            QUICK TARGETS (GALE CRATER)
+            OPTIMIZATION STRATEGY
           </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {waypoints.slice(0, 3).map(wp => (
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {modes.map(mode => (
               <button
-                key={wp.name}
-                onClick={() => onSelectDestination(wp)}
+                key={mode.id}
+                onClick={() => onSelectMode(mode.id)}
                 style={{
-                  backgroundColor: '#201c19',
-                  border: 'none',
+                  flex: 1,
+                  backgroundColor: selectedMode === mode.id ? '#312923' : '#251f1c',
+                  border: selectedMode === mode.id ? `1px solid ${mode.color}` : '1px solid #443a33',
+                  borderRadius: '5px',
+                  padding: '7px 6px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '6px',
-                  color: destination.name === wp.name ? '#f1a16e' : '#f2e7d8',
-                  fontSize: '13px',
-                  padding: '4px 0',
+                  gap: '3px',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  transition: 'all 0.15s'
                 }}
               >
-                <span style={{ color: '#f1a16e' }}>↗</span>
-                <span style={{ textDecoration: destination.name === wp.name ? 'underline' : 'none' }}>
-                  {wp.name}
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: selectedMode === mode.id ? 700 : 500,
+                  color: selectedMode === mode.id ? '#f2e7d8' : '#bdb0a2',
+                  textAlign: 'center'
+                }}>
+                  {mode.label}
+                </span>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '10px',
+                  color: mode.color
+                }}>
+                  Risk: {mode.risk}
                 </span>
               </button>
             ))}
           </div>
         </div>
 
-        <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '16px' }} />
-
-        {/* Multi-Candidate Route Selection (from Omar's Planner) */}
-        {route?.options && route.options.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: '11px',
-                color: '#bdb0a2',
-                letterSpacing: '1px'
-              }}>
-                SELECT CANDIDATE ROUTE (3 OPTIONS)
-              </span>
-              <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: '11px',
-                color: '#bdb0a2'
-              }}>
-                LENGTH
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {route.options.map(opt => {
-                const active = opt.id === activeOptionId;
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => onSelectOption && onSelectOption(opt.id)}
-                    style={{
-                      backgroundColor: active ? '#2c241e' : '#201c19',
-                      border: active ? `1px solid ${opt.color}` : '1px solid #332822',
-                      borderRadius: '6px',
-                      padding: '8px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        border: `1px solid ${opt.color}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        {active && (
-                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: opt.color }} />
-                        )}
-                      </div>
-                      <span style={{
-                        fontSize: '13px',
-                        fontWeight: active ? 600 : 400,
-                        color: active ? '#ffffff' : '#f2e7d8'
-                      }}>
-                        {opt.title}
-                      </span>
-                    </div>
-                    <span style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      color: opt.color
-                    }}>
-                      {opt.summary.total_distance_km} km
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Dynamic "Why this route?" Explanation Box */}
-            {activeOpt && (
-              <div style={{
-                backgroundColor: '#181412',
-                border: `1px solid ${activeOpt.color}`,
-                borderRadius: '8px',
-                padding: '10px 12px',
-                marginTop: '10px'
-              }}>
-                <div style={{
-                  fontSize: '11px',
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  color: activeOpt.color,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}>
-                  <Sparkles size={12} />
-                  <span>WHY THIS ROUTE?</span>
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#f2e7d8',
-                  marginTop: '4px',
-                  lineHeight: 1.4
-                }}>
-                  {activeOpt.why}
-                </div>
-              </div>
-            )}
-
-            {/* Point of No Return (PNR) Safety Indicator */}
-            {activeOpt?.pnr && (
-              <div style={{
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                border: '1px solid #a855f7',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                marginTop: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div>
-                  <div style={{
-                    fontSize: '11px',
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    color: '#d8b4fe',
-                    fontWeight: 600
-                  }}>
-                    POINT OF NO RETURN (PNR)
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#f2e7d8', marginTop: '2px' }}>
-                    Turn-around at <b>km {activeOpt.pnr.km.toFixed(1)}</b> of {activeOpt.summary.total_distance_km} km
-                  </div>
-                </div>
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  backgroundColor: activeOpt.pnr.safe ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                  color: activeOpt.pnr.safe ? '#10b981' : '#f87171'
-                }}>
-                  {activeOpt.pnr.safe ? 'SAFE RETURN' : 'CAUTION'}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Maximum Allowed Slope Adjustment */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-          marginTop: '12px'
-        }}>
-          <span style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '11px',
-            color: '#bdb0a2',
-            letterSpacing: '1px'
-          }}>
-            MAXIMUM ALLOWED SLOPE
-          </span>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button
-              onClick={() => onChangeMaxSlope(Math.max(10, maxSlopeDeg - 1))}
-              style={{
-                width: '32px',
-                height: '32px',
-                backgroundColor: '#302923',
-                border: '1px solid #443a33',
-                borderRadius: '6px',
-                color: '#f2e7d8',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              −
-            </button>
-            <span style={{
+        {/* Max Slope Incline Slider */}
+        <div style={{ marginBottom: '18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: '16px',
-              fontWeight: 500,
-              color: '#f2e7d8',
-              minWidth: '36px',
-              textAlign: 'center'
+              fontSize: '11px',
+              color: '#bdb0a2',
+              letterSpacing: '1px'
             }}>
+              MAX INCLINE LIMIT
+            </label>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '13px', fontWeight: 600, color: '#f1a16e' }}>
               {maxSlopeDeg}°
             </span>
-            <button
-              onClick={() => onChangeMaxSlope(Math.min(35, maxSlopeDeg + 1))}
-              style={{
-                width: '32px',
-                height: '32px',
-                backgroundColor: '#302923',
-                border: '1px solid #443a33',
-                borderRadius: '6px',
-                color: '#f2e7d8',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              +
-            </button>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-          <button
-            onClick={onComputeRoute}
-            disabled={loading}
+          <input
+            type="range"
+            min="10"
+            max="30"
+            step="1"
+            value={maxSlopeDeg}
+            onChange={(e) => onChangeMaxSlope(Number(e.target.value))}
             style={{
-              flex: 1.4,
-              backgroundColor: '#f1a16e',
-              border: '1px solid #f1a16e',
-              borderRadius: '6px',
-              height: '38px',
-              color: '#151210',
-              fontSize: '15px',
-              fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
-              letterSpacing: '0.8px',
-              cursor: loading ? 'wait' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              boxShadow: '0 4px 14px rgba(241, 161, 110, 0.3)'
-            }}
-          >
-            {loading ? 'CALCULATING 3 ROUTES...' : 'FIND PATHS (3 ROUTES) →'}
-          </button>
-          <button
-            onClick={onClearRoute}
-            style={{
-              flex: 1,
+              width: '100%',
+              accentColor: '#f1a16e',
               backgroundColor: '#302923',
-              border: '1px solid #443a33',
-              borderRadius: '6px',
-              height: '38px',
-              color: '#f2e7d8',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer'
+              height: '5px',
+              borderRadius: '3px'
             }}
-          >
-            Reset
-          </button>
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#887b70', marginTop: '2px' }}>
+            <span>10° (Conservative)</span>
+            <span>18° (Hard limit)</span>
+            <span>30° (Extreme)</span>
+          </div>
         </div>
       </div>
 
-      {/* Footer Notes */}
-      <div style={{ borderTop: '1px solid #332922', paddingTop: '10px' }}>
-        <div style={{ fontSize: '13px', fontWeight: 500, color: '#f1c680', marginBottom: '4px' }}>
-          NASA JPL / USGS Mars Models
-        </div>
-        <div style={{ fontSize: '12px', color: '#8c7d70', lineHeight: 1.4 }}>
-          Calculates Best + Alternative paths with Tobler walking speed, Minetti metabolic energy, and Point of No Return.
-        </div>
+      {/* Action Buttons: Compute & Clear */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <button
+          onClick={onComputeRoute}
+          disabled={loading}
+          style={{
+            backgroundColor: loading ? '#6b4c37' : '#f1a16e',
+            color: '#151210',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '12px 18px',
+            fontSize: '15px',
+            fontWeight: 700,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 10px rgba(241, 161, 110, 0.25)',
+            transition: 'all 0.15s'
+          }}
+        >
+          <Compass size={17} />
+          <span>{loading ? 'COMPUTING A* ROUTE…' : 'COMPUTE MARS ROUTE'}</span>
+        </button>
+
+        <button
+          onClick={onClearRoute}
+          style={{
+            backgroundColor: 'transparent',
+            color: '#bdb0a2',
+            border: '1px solid #443a33',
+            borderRadius: '6px',
+            padding: '7px 12px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}
+        >
+          <RotateCcw size={13} />
+          <span>Reset to Default Mission</span>
+        </button>
       </div>
     </div>
   );

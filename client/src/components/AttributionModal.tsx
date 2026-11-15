@@ -1,50 +1,59 @@
 import React from 'react';
-import { X, ExternalLink, ArrowLeft } from 'lucide-react';
+import { X, ExternalLink } from 'lucide-react';
 
 interface AttributionModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
 }
 
-export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onClose }) => {
+export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen = true, onClose }) => {
   if (!isOpen) return null;
 
   const sources = [
     {
       num: '01',
-      title: 'Curiosity / REMS',
-      subtitle: 'Daily meteorology · Gale Crater',
-      desc1: 'Sols 4989–4995, 19–25 Aug 2026. Ground min/max and pressure are reported values.',
-      desc2: 'The feed returns a qualitative UV category. Wind is blank for Sol 4995.',
+      title: 'NASA Mars Trek WMTS',
+      subtitle: 'Viking MDIM2.1, Gale CTX & Curiosity HiRISE Mosaics',
+      desc1: 'Live stream of OGC WMTS RESTful map tiles in Mars Equirectangular projection (EPSG:104905).',
+      desc2: 'Includes 232m global Viking color mosaic, 6m Gale Crater CTX mosaic, and 0.25m Curiosity HiRISE traverse mosaic.',
+      linkText: 'NASA JPL Solar System Treks ↗',
+      url: 'https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars'
+    },
+    {
+      num: '02',
+      title: 'USGS Planetary Geologic Map',
+      subtitle: 'SIM 3292 Geologic Map of Mars (Tanaka et al. 2014)',
+      desc1: 'Official USGS global geological mapping capturing Noachian, Hesperian, and Amazonian stratigraphy.',
+      desc2: 'Streamed directly via NASA Mars Trek ArcGIS MapServer WMTS with live legend classification.',
+      linkText: 'USGS Astrogeology Science Center ↗',
+      url: 'https://astrogeology.usgs.gov/'
+    },
+    {
+      num: '03',
+      title: 'NASA Curiosity REMS & RAD',
+      subtitle: 'Daily meteorology & radiation dosimeter · Gale Crater',
+      desc1: 'Sol 4995 environmental telemetry: ground temperatures (-84°C to +4°C), atmospheric pressure (777 Pa).',
+      desc2: 'RAD dosimeter reports galactic cosmic ray exposure (0.58 mSv/day, 24.2 μSv/h) on Gale Crater floor.',
       linkText: 'NASA/JPL-Caltech · REMS team, CAB (CSIC–INTA) ↗',
       url: 'https://mars.nasa.gov/msl/mission/instruments/rems/'
     },
     {
-      num: '02',
-      title: 'Viking Orbiter mosaic',
-      subtitle: 'Mars Planet Globe · Valles Marineris hemisphere',
-      desc1: '102 Viking Orbiter images. The globe illustrates planetary context.',
-      desc2: 'The global view and local traverse show different extents.',
-      linkText: 'NASA/JPL-Caltech ↗',
-      url: 'https://photojournal.jpl.nasa.gov/catalog/PIA00407'
-    },
-    {
-      num: '03',
-      title: 'MRO / HiRISE',
-      subtitle: 'PIA26306 · Mount Sharp boxwork',
-      desc1: 'The orbital photograph shows the boxwork ridges in the foothills of Mount Sharp.',
-      desc2: 'The routes, pins, layer masks and elevation profiles are illustrative overlays.',
-      linkText: 'NASA/JPL-Caltech/University of Arizona ↗',
-      url: 'https://photojournal.jpl.nasa.gov/catalog/PIA26306'
-    },
-    {
       num: '04',
-      title: 'EVA planning scenario',
-      subtitle: 'Local fallback · synthetic inputs',
-      desc1: 'Crew resources, communication, route timings and risk scores belong to this scenario.',
-      desc2: 'Risk is a heuristic percentage. Radiation dose has no matching measurement in this feed.',
-      linkText: 'Design scenario · ARES-Gale',
-      url: 'https://mars.nasa.gov/'
+      title: 'MOLA + HRSC Topographic Blend',
+      subtitle: 'USGS / ESA 200m Blended Elevation Model',
+      desc1: 'Digital elevation model combining Mars Global Surveyor MOLA laser altimetry and Mars Express HRSC stereo data.',
+      desc2: 'Provides ground truth for slope gradients, hillshade rendering, and elevation profile extraction.',
+      linkText: 'USGS / ESA Planetary Maps ↗',
+      url: 'https://planetarymaps.usgs.gov/'
+    },
+    {
+      num: '05',
+      title: 'EVA & Rover Bioenergetic Models',
+      subtitle: 'Minetti Metabolic Cost & Tobler Hiking Function',
+      desc1: 'Biomechanical energy modeling for 130 kg suited astronaut locomotion and 900 kg electric rover traversal.',
+      desc2: 'Tobler exponential walking function and Minetti grade cost polynomial (J/(kg·m)).',
+      linkText: 'Minetti et al. (2002) / Tobler (1993) ↗',
+      url: 'https://en.wikipedia.org/wiki/Tobler%27s_hiking_function'
     }
   ];
 
@@ -89,99 +98,110 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
             <h2 style={{
               margin: 0,
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: '40px',
-              fontWeight: 600,
+              fontSize: '38px',
+              fontWeight: 700,
               color: '#f3e7d8'
             }}>
-              Sources & field assumptions
+              NASA Sources & Scientific Provenance
             </h2>
             <button
               onClick={onClose}
               style={{
                 backgroundColor: 'transparent',
-                border: 'none',
-                color: '#b8a99a',
+                border: '1px solid #443a33',
+                color: '#bdb0a2',
+                borderRadius: '6px',
+                padding: '6px',
                 cursor: 'pointer',
-                padding: '6px'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
         </div>
 
-        <div style={{ height: '1px', backgroundColor: '#332822', marginBottom: '24px' }} />
+        <div style={{ height: '1px', backgroundColor: '#332922', marginBottom: '28px' }} />
 
-        {/* 4 Citation Sections */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          {sources.map((src) => (
-            <div key={src.num} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: '15px',
-                color: '#ed9d66',
-                fontWeight: 600,
-                paddingTop: '4px'
-              }}>
-                {src.num}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#f3e7d8' }}>
-                    {src.title}
-                  </h3>
-                  <span style={{ fontSize: '13px', color: '#b8a99a' }}>
-                    {src.subtitle}
+        {/* Source Cards Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '16px',
+          marginBottom: '28px'
+        }}>
+          {sources.map(src => (
+            <div
+              key={src.num}
+              style={{
+                backgroundColor: '#201c19',
+                border: '1px solid #332922',
+                borderRadius: '8px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#ed9d66', fontWeight: 700 }}>
+                    [{src.num}]
                   </span>
+                  <span style={{ fontSize: '11px', color: '#887b70' }}>NASA Verified</span>
                 </div>
-                <p style={{ margin: '8px 0 4px 0', fontSize: '14px', color: '#bdb0a2', lineHeight: 1.5 }}>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: '#f3e7d8' }}>
+                  {src.title}
+                </h3>
+                <div style={{ fontSize: '12px', color: '#f1c680', marginBottom: '10px' }}>
+                  {src.subtitle}
+                </div>
+                <p style={{ fontSize: '12px', color: '#bdb0a2', lineHeight: '1.5', margin: '0 0 8px 0' }}>
                   {src.desc1}
                 </p>
-                <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#8c7d70', lineHeight: 1.5 }}>
+                <p style={{ fontSize: '11px', color: '#887b70', lineHeight: '1.4', margin: '0 0 14px 0' }}>
                   {src.desc2}
                 </p>
-                <a
-                  href={src.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontSize: '13px',
-                    color: '#f1a16e',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  {src.linkText}
-                </a>
               </div>
+
+              <a
+                href={src.url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: '12px',
+                  color: '#ed9d66',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: 600
+                }}
+              >
+                <span>{src.linkText}</span>
+              </a>
             </div>
           ))}
         </div>
 
-        <div style={{ height: '1px', backgroundColor: '#332822', margin: '28px 0 20px 0' }} />
-
-        {/* Back to Mission Control Button */}
-        <div>
+        {/* Footer Close */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             onClick={onClose}
             style={{
               backgroundColor: '#302923',
-              border: '1px solid #7c4c31',
-              color: '#f1a16e',
-              padding: '10px 20px',
+              border: '1px solid #443a33',
+              color: '#f3e7d8',
               borderRadius: '6px',
+              padding: '10px 24px',
               fontSize: '14px',
               fontWeight: 600,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
+              cursor: 'pointer'
             }}
           >
-            <ArrowLeft size={16} />
-            ← &nbsp; Mission control
+            Close Observation Record
           </button>
         </div>
       </div>

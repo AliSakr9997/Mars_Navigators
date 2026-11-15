@@ -2,19 +2,24 @@ import React, { useState } from 'react';
 import { ElevationPoint } from '../types/api';
 
 interface ElevationProfileProps {
-  profile: ElevationPoint[];
+  profile?: ElevationPoint[];
+  elevationProfile?: ElevationPoint[];
   routeCoordinates?: [number, number][];
   onHoverCoord?: (coord: [number, number] | null) => void;
+  onHoverPoint?: (coord: [number, number] | null) => void;
   maxSlopeDeg?: number;
 }
 
 export const ElevationProfile: React.FC<ElevationProfileProps> = ({
   profile,
+  elevationProfile,
   routeCoordinates = [],
   onHoverCoord,
+  onHoverPoint,
   maxSlopeDeg = 20
 }) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const triggerHover = onHoverPoint || onHoverCoord;
 
   // Fallback default points if route not yet computed
   const defaultProfile: ElevationPoint[] = [
@@ -25,7 +30,8 @@ export const ElevationProfile: React.FC<ElevationProfileProps> = ({
     { distance_km: 3.12, elevation_m: -4153, slope_deg: 6.5 }
   ];
 
-  const activeData = profile && profile.length > 1 ? profile : defaultProfile;
+  const inputData = elevationProfile || profile;
+  const activeData = inputData && inputData.length > 1 ? inputData : defaultProfile;
 
   const elevs = activeData.map(p => p.elevation_m);
   const slopes = activeData.map(p => p.slope_deg);
@@ -59,7 +65,7 @@ export const ElevationProfile: React.FC<ElevationProfileProps> = ({
 
     if (svgX < padLeft || svgX > padLeft + chartW) {
       setHoverIndex(null);
-      if (onHoverCoord) onHoverCoord(null);
+      if (triggerHover) triggerHover(null);
       return;
     }
 
@@ -77,18 +83,18 @@ export const ElevationProfile: React.FC<ElevationProfileProps> = ({
     });
 
     setHoverIndex(closestIdx);
-    if (onHoverCoord && routeCoordinates.length > 0) {
+    if (triggerHover && routeCoordinates.length > 0) {
       const coordIdx = Math.min(
         Math.floor((closestIdx / (activeData.length - 1)) * (routeCoordinates.length - 1)),
         routeCoordinates.length - 1
       );
-      onHoverCoord(routeCoordinates[coordIdx]);
+      triggerHover(routeCoordinates[coordIdx]);
     }
   };
 
   const handleMouseLeave = () => {
     setHoverIndex(null);
-    if (onHoverCoord) onHoverCoord(null);
+    if (triggerHover) triggerHover(null);
   };
 
   const currentHover = hoverIndex !== null ? activeData[hoverIndex] : null;

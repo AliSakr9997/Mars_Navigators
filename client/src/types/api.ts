@@ -1,5 +1,5 @@
 /**
- * TypeScript API interfaces matching ARES-Gale FastAPI backend schemas
+ * TypeScript API interfaces matching ARES-Gale NASA Mars Mission Console
  */
 
 export interface Waypoint {
@@ -9,12 +9,15 @@ export interface Waypoint {
   elevation_m?: number;
 }
 
+export type TransportMode = 'walking' | 'rover';
+
 export interface RouteRequest {
   start: Waypoint;
   destination: Waypoint;
   mode: string; // 'Balanced' | 'Safest (max clearance)' | 'Min slope' | 'Energy saver' | 'Shortest distance' | 'Custom'
   algorithm?: string; // 'A* + any-angle smoothing' | 'A*' | 'Dijkstra' | 'Weighted A* (ε=2.5)' | 'Greedy best-first'
   max_slope_deg?: number;
+  transportMode?: TransportMode;
 }
 
 export interface ElevationPoint {
@@ -28,6 +31,24 @@ export interface TraversedGeology {
   percent: number;
 }
 
+export interface PointOfNoReturn {
+  km: number;
+  safe: boolean;
+  limitingFactor: 'Oxygen' | 'Battery' | 'Thermal' | 'Nominal';
+  returnTimeMin: number;
+}
+
+export interface RouteOption {
+  id: 'P1' | 'P2' | 'P3' | string;
+  name: string;
+  feature: string;
+  color: string;
+  why: string;
+  summary: RouteSummary;
+  route_coordinates: [number, number][];
+  elevation_profile: ElevationPoint[];
+}
+
 export interface RouteSummary {
   total_distance_km: number;
   length_m?: number;
@@ -39,34 +60,14 @@ export interface RouteSummary {
   estimated_eva_time_hours: number;
   energy_kj?: number;
   energy_kcal?: number;
-  oxygen_used_l?: number;
-  battery_used_kwh?: number;
-  radiation_dose_msv?: number;
+  oxygen_consumed_liters?: number;
+  battery_kwh_consumed?: number;
+  rover_battery_kwh_consumed?: number;
+  transportMode?: TransportMode;
   risk_score?: number;
   min_clear_m?: number;
   hazard_level: string;
   hazard_hits?: number;
-  pnr_km?: number;
-  pnr_coord?: [number, number];
-  pnr_safe?: boolean;
-}
-
-export interface RouteOption {
-  id: string; // 'P1', 'P2', 'P3'
-  title: string; // 'BEST (Balanced)', 'ALTERNATIVE (Flattest)', 'BACKUP (Max Clearance)'
-  feature: string;
-  why: string;
-  color: string;
-  summary: RouteSummary;
-  route_coordinates: [number, number][];
-  elevation_profile: ElevationPoint[];
-  pnr: {
-    index: number;
-    km: number;
-    coord: [number, number];
-    safe: boolean;
-    warning?: string;
-  };
 }
 
 export interface RouteResponse {
@@ -74,6 +75,7 @@ export interface RouteResponse {
   metadata: {
     algorithm: string;
     profile?: string;
+    transportMode?: TransportMode;
     dem_source: string;
     grid_resolution_m: number;
     cells_explored?: number;
@@ -85,15 +87,9 @@ export interface RouteResponse {
   route_coordinates: [number, number][]; // [lat, lng] array for Leaflet polyline
   elevation_profile: ElevationPoint[];
   traversed_geology: TraversedGeology[];
-  pnr?: {
-    index: number;
-    km: number;
-    coord: [number, number];
-    safe: boolean;
-    warning?: string;
-  };
   options?: RouteOption[];
   activeOptionId?: string;
+  pnr?: PointOfNoReturn;
 }
 
 export interface CandidateRoute {
@@ -121,6 +117,7 @@ export interface MultiRouteRequest {
   profiles?: string[];
   priority?: string; // 'Safety first' | 'Speed first' | 'Energy / O2 first' | 'Balanced'
   custom_weights?: Record<string, number>;
+  transportMode?: TransportMode;
 }
 
 export interface MultiRouteResponse {
