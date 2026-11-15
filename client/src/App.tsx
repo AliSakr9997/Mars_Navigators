@@ -45,10 +45,10 @@ const DEFAULT_TELEMETRY: TelemetryResponse = {
   disclaimer: 'Curiosity REMS and RAD observation data (NASA PDS / CAB / SwRI).'
 };
 
-export default function App() {
+export default function App({missionName="ARES-Gale",initialStart=INITIAL_WAYPOINTS[0],initialEnd=INITIAL_WAYPOINTS[1]}:{missionName?:string;initialStart?:Waypoint;initialEnd?:Waypoint}={}) {
   const [activeView, setActiveView] = useState<'landing' | 'console' | 'traverse'>('traverse');
-  const [startPoint, setStartPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[0]);
-  const [destPoint, setDestPoint] = useState<Waypoint>(INITIAL_WAYPOINTS[1]);
+  const [startPoint, setStartPoint] = useState<Waypoint>(initialStart);
+  const [destPoint, setDestPoint] = useState<Waypoint>(initialEnd);
   const [waypoints, setWaypoints] = useState<Waypoint[]>(INITIAL_WAYPOINTS);
 
   const [selectedMode, setSelectedMode] = useState<string>('Balanced');
@@ -80,8 +80,8 @@ export default function App() {
   useEffect(() => {
     // 1. Initial baseline route computed via Mars Pathfinding Engine
     const initialRoute = computeRealMarsRoute({
-      start: INITIAL_WAYPOINTS[0],
-      destination: INITIAL_WAYPOINTS[1],
+      start: initialStart,
+      destination: initialEnd,
       mode: 'Balanced',
       algorithm: 'A* + any-angle smoothing',
       max_slope_deg: 20
@@ -262,7 +262,7 @@ export default function App() {
               {/* Mission */}
               <div>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#bdb0a2' }}>MISSION</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>ARES-Gale</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 600, color: '#f2e7d8' }}>{missionName}</div>
               </div>
 
               {/* Sol */}
@@ -594,4 +594,6 @@ export default function App() {
     </div>
   );
 }
+
+
 

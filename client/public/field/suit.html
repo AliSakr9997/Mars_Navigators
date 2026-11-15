@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Suit telemetry · ARES–Gale</title>
 <style>
-:root{color-scheme:dark;--ink:#f1e6d8;--muted:#bdad9e;--line:#47392f;--copper:#eda270;--surface:#231e1a;--base:#181512;--sage:#c3c6a1}
+:root{color-scheme:dark;--ink:#f1e6d8;--muted:#bdad9e;--line:#623d40;--copper:#ff9983;--surface:#241819;--base:#170f10;--sage:#c3c6a1}
 *{box-sizing:border-box}body{margin:0;background:var(--base);color:var(--ink);font:16px/1.5 Inter,Arial,sans-serif}main{max-width:1230px;margin:auto;padding:34px 42px 54px}header,article>header,.section-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .kicker,.unit,.stamp,th,code,.signal{font:12px/1.5 "IBM Plex Mono",Consolas,monospace;letter-spacing:.055em}.kicker,.stamp,.unit,th,small{color:var(--muted)}h1,h2,h3,p{margin:0}h1{font:600 clamp(34px,5vw,55px)/1.1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:-.035em;margin:7px 0 24px}h2{font-size:21px}h3{font-size:17px}.mast{border-bottom:1px solid var(--line);margin-bottom:25px}.mast .kicker{color:var(--copper)}.stamp{text-align:right}
 .grid{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(280px,.82fr);gap:16px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px}.modes{display:flex;gap:4px;background:#181411;border:1px solid var(--line);border-radius:5px;padding:4px;margin:20px 0}.modes button{width:50%;color:var(--muted);background:transparent;border:0}.modes [aria-pressed=true]{color:var(--ink);background:#443227}
@@ -81,3 +81,4 @@ $('feed-form').onsubmit=e=>{e.preventDefault();if(active)return;let endpoint;try
 window.addEventListener('pagehide',disconnect);render();if(rows.length)signal('Last saved','offline');
 </script>
 </html>
+

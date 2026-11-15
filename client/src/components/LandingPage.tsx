@@ -88,7 +88,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             onClick={onOpenConsole}
             style={{
               backgroundColor: '#201c19',
-              border: '1px solid #443a33',
+              border: '1px solid #623d40',
               borderRadius: '6px',
               color: '#bdb0a2',
               padding: '8px 16px',
@@ -103,7 +103,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = '#bdb0a2';
-              e.currentTarget.style.borderColor = '#443a33';
+              e.currentTarget.style.borderColor = '#623d40';
             }}
           >
             Mission Control
@@ -281,7 +281,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* About the Team Banner */}
         <div style={{
           backgroundColor: '#1b1714',
-          border: '1px solid #443a33',
+          border: '1px solid #623d40',
           borderRadius: '12px',
           maxWidth: '780px',
           width: '100%',
@@ -338,7 +338,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         zIndex: 10
       }}>
         <div style={{
-          backgroundColor: '#181512',
+          backgroundColor: '#170f10',
           border: '1px solid #332822',
           borderRadius: '10px',
           padding: '18px',
@@ -356,7 +356,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div style={{
-          backgroundColor: '#181512',
+          backgroundColor: '#170f10',
           border: '1px solid #332822',
           borderRadius: '10px',
           padding: '18px',
@@ -374,7 +374,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div style={{
-          backgroundColor: '#181512',
+          backgroundColor: '#170f10',
           border: '1px solid #332822',
           borderRadius: '10px',
           padding: '18px',
@@ -392,7 +392,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div style={{
-          backgroundColor: '#181512',
+          backgroundColor: '#170f10',
           border: '1px solid #332822',
           borderRadius: '10px',
           padding: '18px',
@@ -454,3 +454,4 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     </div>
   );
 };
+

@@ -287,7 +287,7 @@ export const MarsMap: React.FC<MarsMapProps> = ({
   return (
     <div style={{
       backgroundColor: '#201c19',
-      border: '1px solid #443a33',
+      border: '1px solid #623d40',
       borderRadius: '12px',
       overflow: 'hidden',
       display: 'flex',
@@ -384,7 +384,7 @@ export const MarsMap: React.FC<MarsMapProps> = ({
                 onClick={() => onToggleLayer(item.key as keyof MapLayersState)}
                 style={{
                   backgroundColor: '#312923',
-                  border: active ? `1px solid ${item.color}` : '1px solid #443a33',
+                  border: active ? `1px solid ${item.color}` : '1px solid #623d40',
                   borderRadius: '5px',
                   padding: '8px 12px',
                   display: 'flex',
@@ -421,3 +421,4 @@ export const MarsMap: React.FC<MarsMapProps> = ({
     </div>
   );
 };
+

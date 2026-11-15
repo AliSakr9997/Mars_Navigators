@@ -30,5 +30,7 @@ function suitSample() {
   try { return JSON.parse(localStorage.getItem('ares-gale-suit-v1') || '[]')[0] || {}; }
   catch { return {}; }
 }
+window.addEventListener('storage',event=>{if(event.key==='ares-gale-suit-v1')draw();});
 window.addEventListener('DOMContentLoaded',()=>fetch('/api/telemetry').then(r=>r.ok?r.json():null).then(data=>{surfaceData=data;draw()}).catch(()=>{}));
+
 

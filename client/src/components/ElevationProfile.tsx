@@ -96,7 +96,7 @@ export const ElevationProfile: React.FC<ElevationProfileProps> = ({
   return (
     <div style={{
       backgroundColor: '#201c19',
-      border: '1px solid #443a33',
+      border: '1px solid #623d40',
       borderRadius: '12px',
       padding: '20px',
       display: 'flex',
@@ -218,3 +218,4 @@ export const ElevationProfile: React.FC<ElevationProfileProps> = ({
     </div>
   );
 };
+

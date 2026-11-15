@@ -41,3 +41,9 @@ def traverse(query: Traverse):
                 rise=result["climb_m"], loss=result["descent_m"], h=result["hazard_hits"], risk=risk,
                 score=100-risk, cl="High Risk" if risk>=50 else "Caution" if risk>=25 else "Safe",
                 time=round(result["time_min"]), terrain=model.source)
+
+@router.get("/api/field/extent")
+def field_extent():
+    west, north = terrain.grid_to_lonlat(0, 0)
+    east, south = terrain.grid_to_lonlat(terrain.H - 1, terrain.W - 1)
+    return dict(west=west, north=north, east=east, south=south)

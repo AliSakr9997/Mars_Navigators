@@ -90,8 +90,8 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
       padding: '24px'
     }}>
       <div style={{
-        backgroundColor: '#181512',
-        border: '1px solid #443a33',
+        backgroundColor: '#170f10',
+        border: '1px solid #623d40',
         borderRadius: '12px',
         maxWidth: '1100px',
         width: '100%',
@@ -167,7 +167,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
           {/* Left Column: Reading source */}
           <div style={{
             backgroundColor: '#201c19',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '10px',
             padding: '24px'
           }}>
@@ -191,8 +191,8 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                 style={{
                   padding: '10px',
                   borderRadius: '6px',
-                  backgroundColor: channel === 'manual' ? '#39291f' : '#211c18',
-                  border: channel === 'manual' ? '1px solid #f1a16e' : '1px solid #443a33',
+                  backgroundColor: channel === 'manual' ? '#39291f' : '#241819',
+                  border: channel === 'manual' ? '1px solid #f1a16e' : '1px solid #623d40',
                   color: channel === 'manual' ? '#f1a16e' : '#b8a99a',
                   fontSize: '13px',
                   fontWeight: 600,
@@ -206,8 +206,8 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                 style={{
                   padding: '10px',
                   borderRadius: '6px',
-                  backgroundColor: channel === 'feed' ? '#39291f' : '#211c18',
-                  border: channel === 'feed' ? '1px solid #f1a16e' : '1px solid #443a33',
+                  backgroundColor: channel === 'feed' ? '#39291f' : '#241819',
+                  border: channel === 'feed' ? '1px solid #f1a16e' : '1px solid #623d40',
                   color: channel === 'feed' ? '#f1a16e' : '#b8a99a',
                   fontSize: '13px',
                   fontWeight: 600,
@@ -228,7 +228,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   backgroundColor: '#302923',
-                  border: '1px solid #443a33',
+                  border: '1px solid #623d40',
                   borderRadius: '6px',
                   padding: '8px 14px'
                 }}>
@@ -258,7 +258,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   backgroundColor: '#302923',
-                  border: '1px solid #443a33',
+                  border: '1px solid #623d40',
                   borderRadius: '6px',
                   padding: '8px 14px'
                 }}>
@@ -288,7 +288,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   backgroundColor: '#302923',
-                  border: '1px solid #443a33',
+                  border: '1px solid #623d40',
                   borderRadius: '6px',
                   padding: '8px 14px'
                 }}>
@@ -319,7 +319,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   backgroundColor: '#302923',
-                  border: '1px solid #443a33',
+                  border: '1px solid #623d40',
                   borderRadius: '6px',
                   padding: '8px 14px'
                 }}>
@@ -370,7 +370,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
           {/* Right Column: Latest readings */}
           <div style={{
             backgroundColor: '#201c19',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '10px',
             padding: '24px',
             display: 'flex',
@@ -449,7 +449,7 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
         {/* Bottom Section: Reading Log */}
         <div style={{
           backgroundColor: '#201c19',
-          border: '1px solid #443a33',
+          border: '1px solid #623d40',
           borderRadius: '10px',
           padding: '24px'
         }}>
@@ -495,3 +495,4 @@ export const SuitTelemetryModal: React.FC<SuitTelemetryModalProps> = ({
     </div>
   );
 };
+

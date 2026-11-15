@@ -1,0 +1,18 @@
+.field-workspace{display:grid;grid-template-columns:240px minmax(0,1fr);height:100dvh;background:#160f10;color:#fff0e9;font:14px/1.4 Inter,Arial,sans-serif;color-scheme:dark}
+.field-workspace.rail-closed{grid-template-columns:minmax(0,1fr)}.rail-closed .field-rail{display:none}
+.field-rail{overflow:auto;overscroll-behavior:contain;background:#201516;border-right:1px solid #543337;padding:18px 14px}
+.field-rail header,.field-rail nav button,.field-site span,.rail-open{display:flex;align-items:center;gap:9px}
+.field-rail header{color:#ff9b87;letter-spacing:.09em}.field-rail header button{margin-left:auto;padding:5px}
+.field-rail button,.rail-open{font:inherit;color:inherit;background:#2d1e20;border:1px solid #604044;border-radius:5px;cursor:pointer}
+.field-rail button:hover,.rail-open:hover{border-color:#ef8276;background:#442527}
+.field-rail nav{display:grid;gap:4px;margin:20px 0}.field-rail nav button{padding:9px 10px;border-color:transparent;text-align:left;background:transparent}
+.field-rail nav button[aria-current=page]{background:#54272a;color:#ffb2a2;border-left:3px solid #ff7669}
+.field-rail section{border-top:1px solid #513135;padding:15px 0 0;margin-top:16px}
+.field-rail h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#f4ac99;margin:0 0 10px}
+.field-rail label{display:grid;gap:3px;margin:8px 0;font-size:12px;color:#d1b5b1}
+.field-rail input,.field-rail select{box-sizing:border-box;width:100%;padding:7px;background:#160f10;color:#ffeee7;border:1px solid #613e41;border-radius:4px;font:14px inherit;font-family:inherit}
+.field-site{width:100%;text-align:left;margin:3px 0;padding:7px}.field-rail small{color:#cfb5ae;font-size:11px}.field-site small{display:block;margin-left:23px}
+.field-picks{display:flex;gap:5px;margin:10px 0 4px}.field-picks button{flex:1;padding:7px}
+.field-content{display:flex;flex-direction:column;min-width:0;overflow:auto}.field-content iframe{width:100%;flex:1;border:0;min-height:0}.field-content iframe[hidden]{display:none}
+.rail-open{align-self:flex-start;margin:6px;padding:6px 12px}
+@media(max-width:759px){.field-workspace{grid-template-columns:minmax(0,1fr)}.field-rail{position:absolute;z-index:5;inset:0 auto 0 0;width:min(82vw,270px);box-shadow:10px 0 35px #10070999}}

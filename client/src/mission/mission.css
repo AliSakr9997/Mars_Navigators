@@ -27,7 +27,7 @@
 .flight-track{position:absolute;bottom:6.5%;width:min(170px,34vw);height:2px;background:#e2be9e41}
 .flight-track i,.init-line:after{display:block;content:'';height:100%;background:#f5aa7e;transform-origin:left;animation:approach 10.5s linear both}
 @keyframes approach{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.mission-entry .mission-start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;justify-content:center;align-items:center;gap:24px;min-width:185px;min-height:64px;padding:11px 26px;font:600 28px var(--display);letter-spacing:.16em;background:linear-gradient(105deg,#372825ec,#201d21e0);border:1px solid #ebab82;border-radius:3px;box-shadow:0 0 24px #ff8e502a,inset 0 0 15px #f1a26913;transition:background .2s,box-shadow .2s;animation:fade-up .4s ease-out}
+.mission-entry .mission-start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;justify-content:center;align-items:center;gap:24px;min-width:185px;min-height:64px;padding:11px 26px;font:600 28px var(--display);letter-spacing:.16em;background:linear-gradient(105deg,#522425ef,#29171be8);border:1px solid #ff9983;border-radius:3px;box-shadow:0 0 24px #ff8e502a,inset 0 0 15px #f1a26913;transition:background .2s,box-shadow .2s;animation:fade-up .4s ease-out}
 .mission-start:hover{box-shadow:0 0 33px #ff9f5f66,inset 0 0 17px #f1a26939!important}.mission-start svg,.access-submit svg{transition:transform .2s}.mission-start:hover svg,.access-submit:hover svg{transform:translateX(4px)}
 .surface-caption{position:absolute;bottom:clamp(20px,4vw,56px);left:clamp(20px,3.7vw,56px);text-shadow:0 2px 8px #100c0b}
 .surface-caption div{display:flex;align-items:center;gap:10px;font:12px var(--mono);letter-spacing:.16em}.location-line{width:24px;height:1px;background:#ffaf7f}.surface-caption>span{display:block;margin-top:6px;color:#e2ccbb;font-size:12px}
@@ -47,3 +47,4 @@
 @media(max-width:650px){.state-access,.state-initializing{place-items:center}.access-card{margin:0;padding:26px 24px}.mission-brand{font-size:21px}.mission-brand svg{width:24px}.surface-caption{bottom:20px}.mission-entry .mission-start{min-width:156px;min-height:54px;font-size:24px}}
 @media(max-height:650px){.state-access .surface-caption,.state-initializing .surface-caption{display:none}.state-access,.state-initializing{padding-block:78px 24px}}
 @media(prefers-reduced-motion:reduce){.mission-entry *,.mission-entry:before,.mission-dashboard,.init-line:after{animation:none!important;transition:none!important}.access-card.exiting{opacity:0}}
+

@@ -61,8 +61,8 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
       padding: '24px'
     }}>
       <div style={{
-        backgroundColor: '#181512',
-        border: '1px solid #443a33',
+        backgroundColor: '#170f10',
+        border: '1px solid #623d40',
         borderRadius: '12px',
         maxWidth: '960px',
         width: '100%',
@@ -188,3 +188,4 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
     </div>
   );
 };
+

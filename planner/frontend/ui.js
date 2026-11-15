@@ -3,6 +3,7 @@ const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>]/g,c=>({'
 let D=ARES.decodeData(P);const TR={},A={};P.TR_SPEC.forEach(s=>TR[s.key]=s.default);P.A_SPEC.forEach(s=>A[s.key]=s.default);
 const ZONES=[];let zoneMode=false,famOnly=false,layerPick='';
 let g=ARES.makeGrid(D,TR,ZONES),S=null,E=null,pl=null,tms=[],fms=[],sel=null,layer='height',infl=null,stage='full',prof={t:'Balanced',f:'Balanced'},tw={...ARES.TERRAIN_PRIORITIES.Balanced},fw={...ARES.FULL_PRIORITIES.Balanced},page=1;
+if(window.fieldEndpoints){S=window.fieldEndpoints.slice(0,2);E=window.fieldEndpoints.slice(2);}
 const K=4,CR=ARES.CRITERIA,fmt=(k,v)=>CR[k]?CR[k].fmt(v):v;
 const NAMES=['1 Pick','2 Terrain paths','3 Assumptions','4 What changed','5 Score','6 Path cards','7 Export & audit'];
 const PROFILES={Balanced:'Balanced'};
@@ -189,3 +190,4 @@ function p7(){const el=$('p7');if(!pl){el.innerHTML=need();return}
  <h2>Audit: every setting behind these numbers</h2><textarea id="aud" readonly>${esc(JSON.stringify(audit,null,1))}</textarea><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText($('aud').value)">Copy audit</button>`}
 function render(){maps=[];[null,p1,p2,p3,p4,p5,p6,p7][page]()}
 go(1);
+

@@ -21,7 +21,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#181512',
+      backgroundColor: '#170f10',
       color: '#f3e7d8',
       fontFamily: "'Inter', system-ui, sans-serif",
       overflowX: 'hidden'
@@ -29,7 +29,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
       {/* 83px Left Navigation Rail */}
       <aside style={{
         width: '83px',
-        backgroundColor: '#211c18',
+        backgroundColor: '#241819',
         borderRight: '1px solid #332822',
         display: 'flex',
         flexDirection: 'column',
@@ -62,7 +62,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             style={{
               width: '71px',
               height: '58px',
-              backgroundColor: '#211c18',
+              backgroundColor: '#241819',
               border: '1px solid transparent',
               borderRadius: '6px',
               color: '#b8a99a',
@@ -76,7 +76,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               transition: 'all 0.2s'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#241819'}
           >
             <Home size={18} color="#b8a99a" />
             <span style={{ fontSize: '11px', fontWeight: 500 }}>Home</span>
@@ -110,7 +110,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             style={{
               width: '71px',
               height: '58px',
-              backgroundColor: '#211c18',
+              backgroundColor: '#241819',
               border: '1px solid transparent',
               borderRadius: '6px',
               color: '#b8a99a',
@@ -124,7 +124,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               transition: 'all 0.2s'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#241819'}
           >
             <MapPin size={18} color="#b8a99a" />
             <span style={{ fontSize: '11px', fontWeight: 500 }}>Traverse</span>
@@ -136,7 +136,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             style={{
               width: '71px',
               height: '58px',
-              backgroundColor: '#211c18',
+              backgroundColor: '#241819',
               border: '1px solid transparent',
               borderRadius: '6px',
               color: '#b8a99a',
@@ -150,7 +150,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               transition: 'all 0.2s'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2c2520'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#211c18'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#241819'}
           >
             <BookOpen size={18} color="#b8a99a" />
             <span style={{ fontSize: '11px', fontWeight: 500 }}>Sources</span>
@@ -341,7 +341,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
             onClick={onOpenSuitTelemetry}
             style={{
               backgroundColor: '#201c19',
-              border: '1px solid #443a33',
+              border: '1px solid #623d40',
               borderRadius: '10px',
               padding: '20px',
               display: 'flex',
@@ -352,7 +352,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
               minHeight: '380px'
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f1a16e'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = '#443a33'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = '#623d40'}
           >
             <div>
               <div style={{
@@ -451,7 +451,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
           {/* 02 / PLANETARY VIEW */}
           <div style={{
             backgroundColor: '#201c19',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '10px',
             padding: '20px',
             display: 'flex',
@@ -586,7 +586,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
           {/* 03 / OBSERVATION LOG */}
           <div style={{
             backgroundColor: '#201c19',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '10px',
             padding: '20px',
             display: 'flex',
@@ -695,7 +695,7 @@ export const MissionControl: React.FC<MissionControlProps> = ({
         {/* 04 / SURFACE WEATHER (Weekly Temperature Profile) */}
         <div style={{
           backgroundColor: '#201c19',
-          border: '1px solid #443a33',
+          border: '1px solid #623d40',
           borderRadius: '10px',
           padding: '20px',
           display: 'flex',
@@ -791,3 +791,4 @@ export const MissionControl: React.FC<MissionControlProps> = ({
     </div>
   );
 };
+

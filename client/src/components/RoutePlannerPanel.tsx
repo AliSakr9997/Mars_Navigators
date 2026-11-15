@@ -40,7 +40,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
   return (
     <div style={{
       backgroundColor: '#201c19',
-      border: '1px solid #443a33',
+      border: '1px solid #623d40',
       borderRadius: '12px',
       padding: '22px',
       display: 'flex',
@@ -85,7 +85,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
           <div style={{
             position: 'relative',
             backgroundColor: '#302923',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '6px',
             padding: '10px 14px',
             display: 'flex',
@@ -112,7 +112,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
                 }}
               >
                 {waypoints.map(w => (
-                  <option key={w.name} value={w.name} style={{ backgroundColor: '#211c18', color: '#f2e7d8' }}>
+                  <option key={w.name} value={w.name} style={{ backgroundColor: '#241819', color: '#f2e7d8' }}>
                     {w.name}
                   </option>
                 ))}
@@ -137,7 +137,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
           <div style={{
             position: 'relative',
             backgroundColor: '#302923',
-            border: '1px solid #443a33',
+            border: '1px solid #623d40',
             borderRadius: '6px',
             padding: '10px 14px',
             display: 'flex',
@@ -164,7 +164,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
                 }}
               >
                 {waypoints.map(w => (
-                  <option key={w.name} value={w.name} style={{ backgroundColor: '#211c18', color: '#f2e7d8' }}>
+                  <option key={w.name} value={w.name} style={{ backgroundColor: '#241819', color: '#f2e7d8' }}>
                     {w.name}
                   </option>
                 ))}
@@ -313,7 +313,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
                 width: '32px',
                 height: '32px',
                 backgroundColor: '#302923',
-                border: '1px solid #443a33',
+                border: '1px solid #623d40',
                 borderRadius: '6px',
                 color: '#f2e7d8',
                 fontSize: '16px',
@@ -342,7 +342,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
                 width: '32px',
                 height: '32px',
                 backgroundColor: '#302923',
-                border: '1px solid #443a33',
+                border: '1px solid #623d40',
                 borderRadius: '6px',
                 color: '#f2e7d8',
                 fontSize: '16px',
@@ -383,7 +383,7 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
             style={{
               flex: 1,
               backgroundColor: '#302923',
-              border: '1px solid #443a33',
+              border: '1px solid #623d40',
               borderRadius: '6px',
               height: '36px',
               color: '#f2e7d8',
@@ -409,3 +409,4 @@ export const RoutePlannerPanel: React.FC<RoutePlannerPanelProps> = ({
     </div>
   );
 };
+
