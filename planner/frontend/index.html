@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>ARES Mars Route Planner v5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="style.css"></head><body><div class="w">
+<h1>🔴 ARES — Mars Route Planner v5</h1>
+<div id="demo"></div>
+<nav id="nav"></nav>
+<div id="p1" class="pg"></div><div id="p2" class="pg"></div><div id="p3" class="pg"></div><div id="p4" class="pg"></div><div id="p5" class="pg"></div><div id="p6" class="pg"></div><div id="p7" class="pg"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="engine.js"></script>
+<script>
+fetch((window.ARES_API||'')+'/api/payload').then(r=>{if(!r.ok)throw new Error('backend answered '+r.status);return r.json()}).then(p=>{
+  window.ARES_PAYLOAD=p;const s=document.createElement('script');s.src='ui.js';document.body.appendChild(s)
+}).catch(e=>{document.body.insertAdjacentHTML('afterbegin','<p style="color:#c62828;padding:12px">Cannot reach the backend ('+e.message+'). Start it with: uvicorn backend.server:app --port 8000</p>')});
+</script>
+</body></html>
