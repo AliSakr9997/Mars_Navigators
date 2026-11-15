@@ -169,21 +169,230 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           position: 'relative',
           width: 'clamp(260px, 32vw, 360px)',
           height: 'clamp(260px, 32vw, 360px)',
-          margin: '15px auto 30px auto',
+          margin: '25px auto 40px auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          {/* Subtle Outer Orbital Ring */}
+          {/* Phobos Orbital Ellipse Track */}
           <div style={{
             position: 'absolute',
-            width: '128%',
-            height: '128%',
+            top: '50%',
+            left: '50%',
+            width: '430px',
+            height: '144px',
+            marginTop: '-72px',
+            marginLeft: '-215px',
             borderRadius: '50%',
-            border: '1px dashed rgba(241, 161, 110, 0.25)',
-            transform: 'rotateX(75deg)',
-            pointerEvents: 'none'
+            border: '1px dashed rgba(241, 161, 110, 0.22)',
+            transform: 'rotate(-14deg)',
+            pointerEvents: 'none',
+            zIndex: 1
           }} />
+
+          {/* Deimos Orbital Ellipse Track */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '580px',
+            height: '190px',
+            marginTop: '-95px',
+            marginLeft: '-290px',
+            borderRadius: '50%',
+            border: '1px dashed rgba(214, 200, 184, 0.16)',
+            transform: 'rotate(12deg)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }} />
+
+          {/* Phobos Moon Orbit Container (Self-spin like Mars + Orbit around Mars) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: 0,
+              height: 0,
+              animation: 'orbitPhobos 24s linear infinite',
+              pointerEvents: 'auto'
+            }}
+          >
+            <div
+              title="PHOBOS (Inner Moon) — Distance: 9,376 km | Orbit: 7h 39m | Main Feature: Stickney Crater"
+              style={{
+                position: 'absolute',
+                top: '-15px',
+                left: '-16px',
+                width: '32px',
+                height: '28px',
+                cursor: 'pointer',
+                borderRadius: '46% 54% 48% 52% / 54% 46% 52% 48%',
+                overflow: 'hidden',
+                boxShadow: '0 0 8px rgba(0, 0, 0, 0.95), 0 0 3px rgba(241, 161, 110, 0.3)'
+              }}
+            >
+              {/* Seamless Axis-Spinning Phobos Surface Map (Spins like Mars!) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '400%',
+                  height: '100%',
+                  display: 'flex',
+                  animation: 'phobosSpin 12s linear infinite',
+                  willChange: 'transform'
+                }}
+              >
+                <img
+                  src="/phobos_map_web.jpg"
+                  alt="Phobos Surface 1"
+                  style={{
+                    width: '50%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+                <img
+                  src="/phobos_map_web.jpg"
+                  alt="Phobos Surface 2"
+                  style={{
+                    width: '50%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+
+              {/* 3D Spherical Solar Shading on Phobos */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 'inherit',
+                  pointerEvents: 'none',
+                  background: 'radial-gradient(circle at 30% 28%, rgba(255, 235, 210, 0.22) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.88) 90%)',
+                  boxShadow: 'inset -5px -5px 8px rgba(0, 0, 0, 0.96), inset 2px 2px 4px rgba(255, 220, 180, 0.25)',
+                  border: '1px solid rgba(241, 161, 110, 0.25)'
+                }}
+              />
+
+              {/* Telemetry Tag */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-16px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '8px',
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: '#f1a16e',
+                letterSpacing: '1px',
+                whiteSpace: 'nowrap',
+                opacity: 0.85,
+                pointerEvents: 'none',
+                textShadow: '0 2px 4px rgba(0,0,0,0.9)'
+              }}>
+                PHOBOS
+              </div>
+            </div>
+          </div>
+
+          {/* Deimos Moon Orbit Container (Self-spin like Mars + Orbit around Mars) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: 0,
+              height: 0,
+              animation: 'orbitDeimos 32s linear infinite',
+              pointerEvents: 'auto'
+            }}
+          >
+            <div
+              title="DEIMOS (Outer Moon) — Distance: 23,463 km | Orbit: 30.3h | Main Feature: Regolith Blanket & Voltaire Crater"
+              style={{
+                position: 'absolute',
+                top: '-11px',
+                left: '-11px',
+                width: '22px',
+                height: '20px',
+                cursor: 'pointer',
+                borderRadius: '52% 48% 46% 54% / 48% 52% 54% 46%',
+                overflow: 'hidden',
+                boxShadow: '0 0 6px rgba(0, 0, 0, 0.95), 0 0 2px rgba(214, 200, 184, 0.25)'
+              }}
+            >
+              {/* Seamless Axis-Spinning Deimos Surface Map (Spins like Mars!) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '400%',
+                  height: '100%',
+                  display: 'flex',
+                  animation: 'deimosSpin 16s linear infinite',
+                  willChange: 'transform'
+                }}
+              >
+                <img
+                  src="/deimos_map_web.jpg"
+                  alt="Deimos Surface 1"
+                  style={{
+                    width: '50%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+                <img
+                  src="/deimos_map_web.jpg"
+                  alt="Deimos Surface 2"
+                  style={{
+                    width: '50%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+
+              {/* 3D Spherical Solar Shading on Deimos */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 'inherit',
+                  pointerEvents: 'none',
+                  background: 'radial-gradient(circle at 30% 28%, rgba(255, 235, 210, 0.22) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.85) 90%)',
+                  boxShadow: 'inset -3px -3px 6px rgba(0, 0, 0, 0.96), inset 1px 1px 3px rgba(255, 220, 180, 0.25)',
+                  border: '1px solid rgba(214, 200, 184, 0.2)'
+                }}
+              />
+
+              {/* Telemetry Tag */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-16px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '8px',
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: '#d6c8b8',
+                letterSpacing: '1px',
+                whiteSpace: 'nowrap',
+                opacity: 0.85,
+                pointerEvents: 'none',
+                textShadow: '0 2px 4px rgba(0,0,0,0.9)'
+              }}>
+                DEIMOS
+              </div>
+            </div>
+          </div>
 
           {/* Mars Sphere with Floating Animation & Realistic 3D Atmosphere */}
           <div style={{
@@ -192,55 +401,59 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             borderRadius: '50%',
             overflow: 'hidden',
             position: 'relative',
+            zIndex: 10,
             boxShadow: `
-              0 0 50px rgba(224, 108, 58, 0.35),
-              0 0 100px rgba(241, 161, 110, 0.2),
-              inset -35px -35px 70px rgba(0, 0, 0, 0.95),
-              inset 15px 15px 40px rgba(255, 210, 170, 0.25)
+              0 0 50px rgba(224, 108, 58, 0.38),
+              0 0 100px rgba(241, 161, 110, 0.22)
             `,
-            border: '1px solid rgba(241, 161, 110, 0.4)',
+            border: '1px solid rgba(241, 161, 110, 0.45)',
             animation: 'marsFloat 6s ease-in-out infinite'
           }}>
-            <img
-              src="/mars_globe.jpg"
-              alt="Mars 3D Hovering Planet"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block'
-              }}
-              onError={(e) => {
-                e.currentTarget.src = "/viking_mosaic.jpg";
-              }}
-            />
-
-            {/* In-situ Gale Crater Pulsing Beacon */}
+            {/* Seamless 360-Degree Continuous Rotating Mars Texture */}
             <div style={{
               position: 'absolute',
-              top: '47%',
-              left: '58%',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none'
+              top: 0,
+              left: 0,
+              width: '400%',
+              height: '100%',
+              display: 'flex',
+              animation: 'marsSeamlessSpin 40s linear infinite',
+              willChange: 'transform'
             }}>
-              <div style={{
-                width: '14px',
-                height: '14px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(241, 161, 110, 0.4)',
-                animation: 'pulse 2s infinite'
-              }} />
-              <div style={{
-                position: 'absolute',
-                top: '3px',
-                left: '3px',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 0 10px #f1a16e'
-              }} />
+              <img
+                src="/mars_texture_2k.jpg"
+                alt="Mars Rotating Surface Part 1"
+                style={{
+                  width: '50%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
+              <img
+                src="/mars_texture_2k.jpg"
+                alt="Mars Rotating Surface Part 2"
+                style={{
+                  width: '50%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
             </div>
+
+            {/* 3D Spherical Curvature, Shadow & Specular Atmosphere Overlay */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              background: 'radial-gradient(circle at 32% 30%, rgba(255, 230, 200, 0.22) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.95) 100%)',
+              boxShadow: `
+                inset -38px -38px 75px rgba(0, 0, 0, 0.96),
+                inset 16px 16px 42px rgba(255, 215, 175, 0.3)
+              `
+            }} />
           </div>
         </div>
 
@@ -428,6 +641,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Floating Keyframes CSS */}
       <style>{`
+        @keyframes marsSeamlessSpin {
+          0% {
+            transform: translate3d(0%, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
         @keyframes marsFloat {
           0%, 100% {
             transform: translateY(0px) rotate(0deg);
@@ -449,6 +670,110 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             transform: scale(0.95);
             opacity: 0;
           }
+        }
+        @keyframes phobosSpin {
+          0% {
+            transform: translate3d(0%, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+        @keyframes deimosSpin {
+          0% {
+            transform: translate3d(0%, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+
+        @keyframes orbitPhobos {
+          0.0% { transform: translate(208.6px, -52.0px) scale(1.000); z-index: 25; }
+          2.5% { transform: translate(208.8px, -40.4px) scale(1.019); z-index: 25; }
+          5.0% { transform: translate(203.8px, -27.9px) scale(1.037); z-index: 25; }
+          7.5% { transform: translate(193.8px, -14.6px) scale(1.054); z-index: 25; }
+          10.0% { transform: translate(179.0px, -1.0px) scale(1.071); z-index: 25; }
+          12.5% { transform: translate(159.8px, 12.6px) scale(1.085); z-index: 25; }
+          15.0% { transform: translate(136.7px, 25.9px) scale(1.097); z-index: 25; }
+          17.5% { transform: translate(110.2px, 38.6px) scale(1.107); z-index: 25; }
+          20.0% { transform: translate(81.0px, 50.4px) scale(1.114); z-index: 25; }
+          22.5% { transform: translate(49.8px, 60.9px) scale(1.119); z-index: 25; }
+          25.0% { transform: translate(17.4px, 69.9px) scale(1.120); z-index: 25; }
+          27.5% { transform: translate(-15.4px, 77.1px) scale(1.119); z-index: 25; }
+          30.0% { transform: translate(-47.9px, 82.5px) scale(1.114); z-index: 25; }
+          32.5% { transform: translate(-79.2px, 85.9px) scale(1.107); z-index: 25; }
+          35.0% { transform: translate(-108.5px, 87.1px) scale(1.097); z-index: 25; }
+          37.5% { transform: translate(-135.2px, 86.2px) scale(1.085); z-index: 25; }
+          40.0% { transform: translate(-158.5px, 83.1px) scale(1.071); z-index: 25; }
+          42.5% { transform: translate(-178.0px, 78.1px) scale(1.054); z-index: 25; }
+          45.0% { transform: translate(-193.0px, 71.1px) scale(1.037); z-index: 25; }
+          47.5% { transform: translate(-203.3px, 62.3px) scale(1.019); z-index: 25; }
+          50.0% { transform: translate(-208.6px, 52.0px) scale(1.000); z-index: 25; }
+          52.5% { transform: translate(-208.8px, 40.4px) scale(0.981); z-index: 2; }
+          55.0% { transform: translate(-203.8px, 27.9px) scale(0.963); z-index: 2; }
+          57.5% { transform: translate(-193.8px, 14.6px) scale(0.946); z-index: 2; }
+          60.0% { transform: translate(-179.0px, 1.0px) scale(0.929); z-index: 2; }
+          62.5% { transform: translate(-159.8px, -12.6px) scale(0.915); z-index: 2; }
+          65.0% { transform: translate(-136.7px, -25.9px) scale(0.903); z-index: 2; }
+          67.5% { transform: translate(-110.2px, -38.6px) scale(0.893); z-index: 2; }
+          70.0% { transform: translate(-81.0px, -50.4px) scale(0.886); z-index: 2; }
+          72.5% { transform: translate(-49.8px, -60.9px) scale(0.881); z-index: 2; }
+          75.0% { transform: translate(-17.4px, -69.9px) scale(0.880); z-index: 2; }
+          77.5% { transform: translate(15.4px, -77.1px) scale(0.881); z-index: 2; }
+          80.0% { transform: translate(47.9px, -82.5px) scale(0.886); z-index: 2; }
+          82.5% { transform: translate(79.2px, -85.9px) scale(0.893); z-index: 2; }
+          85.0% { transform: translate(108.5px, -87.1px) scale(0.903); z-index: 2; }
+          87.5% { transform: translate(135.2px, -86.2px) scale(0.915); z-index: 2; }
+          90.0% { transform: translate(158.5px, -83.1px) scale(0.929); z-index: 2; }
+          92.5% { transform: translate(178.0px, -78.1px) scale(0.946); z-index: 2; }
+          95.0% { transform: translate(193.0px, -71.1px) scale(0.963); z-index: 2; }
+          97.5% { transform: translate(203.3px, -62.3px) scale(0.981); z-index: 2; }
+          100.0% { transform: translate(208.6px, -52.0px) scale(1.000); z-index: 25; }
+        }
+
+        @keyframes orbitDeimos {
+          0.0% { transform: translate(283.7px, 60.3px) scale(1.000); z-index: 25; }
+          2.5% { transform: translate(277.1px, 74.1px) scale(1.019); z-index: 25; }
+          5.0% { transform: translate(263.7px, 86.1px) scale(1.037); z-index: 25; }
+          7.5% { transform: translate(243.8px, 95.9px) scale(1.054); z-index: 25; }
+          10.0% { transform: translate(217.9px, 103.4px) scale(1.071); z-index: 25; }
+          12.5% { transform: translate(186.6px, 108.3px) scale(1.085); z-index: 25; }
+          15.0% { transform: translate(150.8px, 110.6px) scale(1.097); z-index: 25; }
+          17.5% { transform: translate(111.2px, 110.2px) scale(1.107); z-index: 25; }
+          20.0% { transform: translate(68.9px, 107.0px) scale(1.114); z-index: 25; }
+          22.5% { transform: translate(24.9px, 101.2px) scale(1.119); z-index: 25; }
+          25.0% { transform: translate(-19.8px, 92.9px) scale(1.120); z-index: 25; }
+          27.5% { transform: translate(-63.9px, 82.3px) scale(1.119); z-index: 25; }
+          30.0% { transform: translate(-106.4px, 69.7px) scale(1.114); z-index: 25; }
+          32.5% { transform: translate(-146.4px, 55.4px) scale(1.107); z-index: 25; }
+          35.0% { transform: translate(-182.7px, 39.7px) scale(1.097); z-index: 25; }
+          37.5% { transform: translate(-214.5px, 23.1px) scale(1.085); z-index: 25; }
+          40.0% { transform: translate(-241.1px, 5.8px) scale(1.071); z-index: 25; }
+          42.5% { transform: translate(-261.7px, -11.5px) scale(1.054); z-index: 25; }
+          45.0% { transform: translate(-275.9px, -28.6px) scale(1.037); z-index: 25; }
+          47.5% { transform: translate(-283.3px, -45.0px) scale(1.019); z-index: 25; }
+          50.0% { transform: translate(-283.7px, -60.3px) scale(1.000); z-index: 25; }
+          52.5% { transform: translate(-277.1px, -74.1px) scale(0.981); z-index: 2; }
+          55.0% { transform: translate(-263.7px, -86.1px) scale(0.963); z-index: 2; }
+          57.5% { transform: translate(-243.8px, -95.9px) scale(0.946); z-index: 2; }
+          60.0% { transform: translate(-217.9px, -103.4px) scale(0.929); z-index: 2; }
+          62.5% { transform: translate(-186.6px, -108.3px) scale(0.915); z-index: 2; }
+          65.0% { transform: translate(-150.8px, -110.6px) scale(0.903); z-index: 2; }
+          67.5% { transform: translate(-111.2px, -110.2px) scale(0.893); z-index: 2; }
+          70.0% { transform: translate(-68.9px, -107.0px) scale(0.886); z-index: 2; }
+          72.5% { transform: translate(-24.9px, -101.2px) scale(0.881); z-index: 2; }
+          75.0% { transform: translate(19.8px, -92.9px) scale(0.880); z-index: 2; }
+          77.5% { transform: translate(63.9px, -82.3px) scale(0.881); z-index: 2; }
+          80.0% { transform: translate(106.4px, -69.7px) scale(0.886); z-index: 2; }
+          82.5% { transform: translate(146.4px, -55.4px) scale(0.893); z-index: 2; }
+          85.0% { transform: translate(182.7px, -39.7px) scale(0.903); z-index: 2; }
+          87.5% { transform: translate(214.5px, -23.1px) scale(0.915); z-index: 2; }
+          90.0% { transform: translate(241.1px, -5.8px) scale(0.929); z-index: 2; }
+          92.5% { transform: translate(261.7px, 11.5px) scale(0.946); z-index: 2; }
+          95.0% { transform: translate(275.9px, 28.6px) scale(0.963); z-index: 2; }
+          97.5% { transform: translate(283.3px, 45.0px) scale(0.981); z-index: 2; }
+          100.0% { transform: translate(283.7px, 60.3px) scale(1.000); z-index: 25; }
         }
       `}</style>
     </div>
