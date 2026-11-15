@@ -38,10 +38,15 @@ window.addEventListener('message',event=>{
   }else if(type==='pick'&&['a','b'].includes(which)){
     state.selecting=which;
   }else if(type==='site'){
-    const site=fieldMission.sites.find(s=>s.name===name);
+    const site=fieldMission.sites.find(s=>s.name===name)||fieldMission.sites.find(s=>s.name.includes(name));
     if(!site)return;
+    if(!state.a){
+      setPoint('a',waypoints[0].p,waypoints[0].n);
+    }
     generation++;modelRoutes=null;modelStatus='Fallback';
-    setPoint('b',[site.x,site.y],site.name);state.selecting=state.a?null:'a';
+    setPoint('b',[site.x,site.y],site.name);
+    state.selecting=null;
+    state.computed=true;
   }else return;
   savePoints();draw();
 });

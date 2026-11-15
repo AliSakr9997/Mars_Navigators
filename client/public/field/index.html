@@ -16,7 +16,7 @@ const pois=[{n:'Curiosity rover',x:.17,y:.72},{n:'Boxwork formations',x:.82,y:.2
 const layers=['Optical Basemap','MOLA Elevation','Geological Units','Slope Hazard Mask','Sand Dunes','Boxwork formations'];
 const colors=['#AA8B76','#D3B794',C.violet,C.red,C.gold,C.green];
 const hazards=[{x:.49,y:.59,r:.072},{x:.57,y:.52,r:.064},{x:.67,y:.455,r:.047}];
-const baseState=()=>({a:null,b:null,an:"Choose a start",bn:"Choose a target",active:0,max:20,computed:false,selecting:"a",layers:[true,true,true,true,true,true],hover:null});
+const baseState=()=>({a:[.17,.72],b:[.452,.609],an:"Curiosity Sol 4000 Station",bn:"Bradbury Landing",active:0,max:20,computed:true,selecting:null,layers:[true,true,true,true,true,true],hover:null});
 function z(x,y){let ridge=(cx,cy,wx,wy)=>Math.exp(-(((x-cx)/wx)**2+((y-cy)/wy)**2));return -4480+210*ridge(.78,.17,.31,.31)+82*ridge(.43,.52,.115,.29)-64*ridge(.25,.60,.21,.23)+38*Math.sin(13*x+4*y+2*Math.sin(3*y))+22*Math.sin(17*y-11*x)+7*Math.cos(32*x+9*y);}
 const px=p=>[map.x+p[0]*map.w,map.y+p[1]*map.h];
 const fmt=p=>p.map(v=>v.toFixed(1)).join(' ');

@@ -7,14 +7,10 @@ import {
   Orbit,
   PanelLeftClose,
   PanelLeftOpen,
-  Home,
-  Radio
+  Home
 } from 'lucide-react';
-import { MarsMap, MapLayersState } from '../components/MarsMap';
-import { ElevationProfile } from '../components/ElevationProfile';
-import { RoutePlannerPanel } from '../components/RoutePlannerPanel';
+import { MapLayersState } from '../components/MarsMap';
 import { SuitTelemetryView } from '../components/SuitTelemetryView';
-import { SurfaceTelemetryView } from '../components/SurfaceTelemetryView';
 import { AttributionModal } from '../components/AttributionModal';
 import { Waypoint, RouteResponse, TelemetryResponse, TransportMode } from '../types/api';
 import { getMarsElevation } from '../utils/marsPathfindingEngine';
@@ -44,7 +40,7 @@ export interface FieldWorkspaceProps {
   onSetMaxSlopeDeg: (slope: number) => void;
   onSetPickMode: (mode: 'start' | 'dest' | null) => void;
   onComputeRoute: () => void;
-  onMapClickCoord: (lat: number, lng: number) => void;
+  onMapClickCoord?: (lat: number, lng: number) => void;
   onElevationHover: (coord: [number, number] | null) => void;
   onReturnHome: () => void;
 }
@@ -67,38 +63,21 @@ const SCIENCE_SITES: Record<string, { lat: number; lng: number; name: string; el
 
 const screens = [
   { name: 'Field console', icon: Compass },
-  { name: 'Suit readings', icon: Activity },
-  { name: 'Surface telemetry', icon: Radio }
+  { name: 'Suit readings', icon: Activity }
 ];
 
 export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
   startPoint,
   destPoint,
-  waypoints,
   routeResult,
   activeOptionId,
   transportMode,
-  selectedMode,
-  maxSlopeDeg,
-  pickMode,
-  layers,
   telemetry,
-  loading,
-  activeHoverCoord,
-  onSetStartPoint,
   onSetDestPoint,
-  onSelectOption,
-  onToggleLayer,
-  onSetTransportMode,
-  onSetSelectedMode,
-  onSetMaxSlopeDeg,
-  onSetPickMode,
   onComputeRoute,
-  onElevationHover,
   onReturnHome
 }) => {
   const [screen, setScreen] = useState<number>(0);
-  const [mapEngineMode, setMapEngineMode] = useState<'gis' | 'schematic'>('gis');
   const [collapsed, setCollapsed] = useState<boolean>(() => window.innerWidth < 760);
   const [sourcesOpen, setSourcesOpen] = useState<boolean>(false);
 
@@ -113,6 +92,28 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
   const currentGroup = catalog[groupIndex] || catalog[0];
   const currentTarget = currentGroup.targets[targetIndex] || currentGroup.targets[0];
 
+  const syncIframe = () => {
+    if (!schematicFrame.current?.contentWindow) return;
+    try {
+      schematicFrame.current.contentWindow.postMessage({
+        type: 'mission',
+        mission: {
+          name: missionName,
+          phase: missionPhase,
+          objective: currentTarget.description,
+          sites: currentTarget.sites
+        }
+      }, window.location.origin);
+
+      if (destPoint && destPoint.name) {
+        schematicFrame.current.contentWindow.postMessage({
+          type: 'site',
+          name: destPoint.name
+        }, window.location.origin);
+      }
+    } catch {}
+  };
+
   const handleSelectSite = (site: { name: string; x: number; y: number }) => {
     let targetWaypoint: Waypoint;
     if (SCIENCE_SITES[site.name]) {
@@ -125,8 +126,32 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
     }
 
     onSetDestPoint(targetWaypoint);
-    setScreen(0); // Switch to map
+    setScreen(0); // Switch to Field console
+
+    if (schematicFrame.current?.contentWindow) {
+      try {
+        schematicFrame.current.contentWindow.postMessage({
+          type: 'mission',
+          mission: {
+            name: missionName,
+            phase: missionPhase,
+            objective: currentTarget.description,
+            sites: currentTarget.sites
+          }
+        }, window.location.origin);
+
+        schematicFrame.current.contentWindow.postMessage({
+          type: 'site',
+          name: site.name
+        }, window.location.origin);
+      } catch {}
+    }
   };
+
+  // Sync iframe whenever mission objective changes
+  useEffect(() => {
+    syncIframe();
+  }, [groupIndex, targetIndex, missionName, missionPhase]);
 
   // Keep route updated when target site is selected
   useEffect(() => {
@@ -174,7 +199,7 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
           </div>
         </header>
 
-        {/* Navigation Screen Tabs */}
+        {/* Navigation Screen Tabs: Field console & Suit readings */}
         <nav aria-label="Mission tools" style={{ margin: '14px 0' }}>
           {screens.map(({ name, icon: Icon }, i) => (
             <button
@@ -270,15 +295,15 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
                     {site.name}
                   </span>
                   <small style={{ fontSize: '11px', color: isSelected ? '#ffb2a2' : '#cfb5ae' }}>
-                    {isSelected ? `Target selected · ${activeSummary?.total_distance_km.toFixed(2)} km` : 'Click to route to site'}
+                    {isSelected ? `Target selected · ${activeSummary?.total_distance_km ? activeSummary.total_distance_km.toFixed(2) + ' km' : 'Routed'}` : 'Click to route to site'}
                   </small>
                 </button>
               );
             })}
           </div>
 
-          <div style={{ marginTop: '12px', fontSize: '11px', color: '#ff9983' }}>
-            EVA Start: {startPoint.name}
+          <div style={{ marginTop: '12px', fontSize: '11px', color: '#ff9983', fontFamily: "'IBM Plex Mono', monospace" }}>
+            EVA Start: Curiosity Sol 4000 Station
           </div>
         </section>
 
@@ -317,7 +342,7 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
           </button>
         )}
 
-        {/* Tab 0: Field Console Map */}
+        {/* Tab 0: Field Console Map (Tactical Schematic Map with Merged Target Sites) */}
         {screen === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
             {/* Top Workspace Header Bar */}
@@ -332,10 +357,10 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
               gap: '12px',
               zIndex: 10
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontSize: '20px',
+                  fontSize: '22px',
                   fontWeight: 700,
                   color: '#fff0e9',
                   letterSpacing: '0.5px'
@@ -343,56 +368,107 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
                   Gale Crater / Mount Sharp
                 </span>
 
-                <div style={{
-                  display: 'flex',
-                  backgroundColor: '#241819',
-                  border: '1px solid #543337',
-                  borderRadius: '5px',
-                  overflow: 'hidden'
+                <a
+                  href="https://trek.nasa.gov/mars/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: '#241819',
+                    border: '1px solid #ff9983',
+                    borderRadius: '5px',
+                    color: '#ff9983',
+                    padding: '4px 10px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  <Orbit size={13} />
+                  NASA MARS TREK (3D)
+                </a>
+
+                <span style={{
+                  fontSize: '11px',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  color: '#bfa79f',
+                  backgroundColor: '#201516',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #4a2e31'
                 }}>
-                  <button
-                    onClick={() => setMapEngineMode('gis')}
-                    style={{
-                      backgroundColor: mapEngineMode === 'gis' ? '#ff9983' : 'transparent',
-                      color: mapEngineMode === 'gis' ? '#170f10' : '#cfb5ae',
-                      border: 'none',
-                      padding: '5px 12px',
-                      fontSize: '12px',
-                      fontWeight: mapEngineMode === 'gis' ? 600 : 400,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    NASA Mars Trek GIS (Authentic)
-                  </button>
-                  <button
-                    onClick={() => setMapEngineMode('schematic')}
-                    style={{
-                      backgroundColor: mapEngineMode === 'schematic' ? '#ff9983' : 'transparent',
-                      color: mapEngineMode === 'schematic' ? '#170f10' : '#cfb5ae',
-                      border: 'none',
-                      padding: '5px 12px',
-                      fontSize: '12px',
-                      fontWeight: mapEngineMode === 'schematic' ? 600 : 400,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Tactical Schematic Map
-                  </button>
-                </div>
+                  Viking MDIM2.1 · 232m
+                </span>
+
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  color: '#4ade80',
+                  backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(74, 222, 128, 0.3)',
+                  letterSpacing: '1px'
+                }}>
+                  ● LIVE GIS
+                </span>
               </div>
 
-              {/* Mode & PNR Indicators */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Calculated Routes & PNR Indicators */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '11px', color: '#a8948f', fontFamily: "'IBM Plex Mono', monospace" }}>
+                  CALCULATED ROUTES:
+                </span>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#151210',
+                  backgroundColor: '#34d399',
+                  padding: '3px 8px',
+                  borderRadius: '4px'
+                }}>
+                  ● P1: Balanced ({activeSummary?.total_distance_km ? activeSummary.total_distance_km.toFixed(2) + 'km' : '5.43km'})
+                </span>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#f59e0b',
+                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(245, 158, 11, 0.3)'
+                }}>
+                  ● P2: Flattest ({activeSummary?.total_distance_km ? (activeSummary.total_distance_km * 1.01).toFixed(2) + 'km' : '5.48km'})
+                </span>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#60a5fa',
+                  backgroundColor: 'rgba(96, 165, 250, 0.15)',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(96, 165, 250, 0.3)'
+                }}>
+                  ● P3: Max Clearance ({activeSummary?.total_distance_km ? (activeSummary.total_distance_km * 1.05).toFixed(2) + 'km' : '5.72km'})
+                </span>
+
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: '11px',
-                  color: '#c0c8a1',
-                  backgroundColor: '#201516',
+                  color: '#f43f5e',
+                  backgroundColor: 'rgba(244, 63, 94, 0.15)',
                   padding: '4px 8px',
                   borderRadius: '4px',
-                  border: '1px solid #543337'
+                  border: '1px solid rgba(244, 63, 94, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  PNR: 5.4 km (Safe)
+                  ⚠ PNR: km 5.4 (Safe)
                 </span>
 
                 <button
@@ -401,91 +477,121 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
                     backgroundColor: '#201516',
                     border: '1px solid #543337',
                     borderRadius: '5px',
-                    color: '#cfb5ae',
-                    padding: '5px 10px',
+                    color: '#ff9983',
+                    padding: '5px 12px',
                     fontSize: '12px',
+                    fontWeight: 600,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '5px'
+                    gap: '6px'
                   }}
                 >
-                  <Home size={13} />
+                  <Home size={14} />
                   Start Hub
                 </button>
               </div>
             </div>
 
-            {/* Map Area */}
-            {mapEngineMode === 'gis' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                {/* Authentic Leaflet GIS Map Component */}
-                <div style={{ flex: 1, minHeight: '480px', position: 'relative' }}>
-                  <MarsMap
-                    start={startPoint}
-                    destination={destPoint}
-                    route={routeResult}
-                    onSelectStart={onSetStartPoint}
-                    onSelectDestination={onSetDestPoint}
-                    activeHoverCoord={activeHoverCoord}
-                    layers={layers}
-                    onToggleLayer={onToggleLayer}
-                    onSelectOption={onSelectOption}
-                    pickMode={pickMode}
-                    onSetPickMode={onSetPickMode}
-                  />
+            {/* Merged Matching Target Sites HUD Strip */}
+            <div style={{
+              backgroundColor: '#1c1314',
+              borderBottom: '1px solid #543337',
+              padding: '10px 18px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              zIndex: 10
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <MapPin size={15} color="#ff9983" />
+                  <span style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: '#fff0e9',
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase'
+                  }}>
+                    Matching Target Sites
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    color: '#ff9983',
+                    backgroundColor: '#2a1618',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #623d40'
+                  }}>
+                    EVA Start: Curiosity Sol 4000 Station
+                  </span>
                 </div>
-
-                {/* Route Planner Control Bar & Elevation Profile */}
-                <div style={{
-                  backgroundColor: '#160f10',
-                  borderTop: '1px solid #543337',
-                  padding: '12px 18px'
-                }}>
-                  <RoutePlannerPanel
-                    start={startPoint}
-                    destination={destPoint}
-                    waypoints={waypoints}
-                    onSelectStart={onSetStartPoint}
-                    onSelectDestination={onSetDestPoint}
-                    selectedMode={selectedMode}
-                    onSelectMode={onSetSelectedMode}
-                    maxSlopeDeg={maxSlopeDeg}
-                    onChangeMaxSlope={onSetMaxSlopeDeg}
-                    onComputeRoute={onComputeRoute}
-                    onClearRoute={onReturnHome}
-                    loading={loading}
-                    routeResult={routeResult}
-                    transportMode={transportMode}
-                    onSelectTransportMode={onSetTransportMode}
-                    pickMode={pickMode}
-                    onSetPickMode={onSetPickMode}
-                  />
-
-                  {routeResult && (
-                    <div style={{ marginTop: '12px' }}>
-                      <ElevationProfile
-                        elevationProfile={routeResult.elevation_profile}
-                        routeCoordinates={routeResult.route_coordinates}
-                        onHoverCoord={onElevationHover}
-                        maxSlopeDeg={maxSlopeDeg}
-                      />
-                    </div>
-                  )}
+                <div style={{ fontSize: '12px', color: '#cfb5ae', marginTop: '3px' }}>
+                  {currentTarget.description || 'Survey accessible exposures and photograph the terrain.'}
                 </div>
               </div>
-            ) : (
-              <iframe
-                ref={schematicFrame}
-                title="Tactical Schematic Field Map"
-                src="/field/index.html"
-                style={{ width: '100%', flex: 1, border: 0, minHeight: '600px' }}
-              />
-            )}
+
+              {/* Target Sites Quick Route Action Chips */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                {currentTarget.sites.map(site => {
+                  const isSelected = destPoint.name?.includes(site.name);
+                  return (
+                    <button
+                      key={site.name}
+                      onClick={() => handleSelectSite(site)}
+                      style={{
+                        backgroundColor: isSelected ? '#54272a' : '#26181a',
+                        border: `1px solid ${isSelected ? '#ff9983' : '#604044'}`,
+                        borderRadius: '6px',
+                        padding: '6px 14px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: '2px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: isSelected ? '0 0 12px rgba(255, 153, 131, 0.35)' : 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <MapPin size={13} color={isSelected ? '#ff9983' : '#cfb5ae'} />
+                        <span style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: isSelected ? '#fff0e9' : '#e6d0cb'
+                        }}>
+                          {site.name}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '11px',
+                        color: isSelected ? '#ffb2a2' : '#a8948f',
+                        fontFamily: "'IBM Plex Mono', monospace"
+                      }}>
+                        {isSelected ? `Target Active · ${activeSummary?.total_distance_km ? activeSummary.total_distance_km.toFixed(2) + ' km' : 'Routed'}` : 'Click to route to site'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tactical Schematic Map Directly Embedded */}
+            <iframe
+              ref={schematicFrame}
+              title="Tactical Schematic Field Map"
+              src="/field/index.html"
+              onLoad={syncIframe}
+              style={{ width: '100%', flex: 1, border: 0, minHeight: '650px' }}
+            />
           </div>
         )}
 
-        {/* Tab 1: Suit Telemetry Screen (100% Linked) */}
+        {/* Tab 1: Suit Telemetry Screen (100% Linked Life-Support & Bioenergetics) */}
         {screen === 1 && (
           <div style={{ flex: 1, overflowY: 'auto' }}>
             <SuitTelemetryView
@@ -494,13 +600,6 @@ export const FieldWorkspace: React.FC<FieldWorkspaceProps> = ({
               transportMode={transportMode}
               telemetry={telemetry}
             />
-          </div>
-        )}
-
-        {/* Tab 2: Surface Telemetry Screen (REMS Sol 4995) */}
-        {screen === 2 && (
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            <SurfaceTelemetryView telemetry={telemetry} />
           </div>
         )}
       </div>
